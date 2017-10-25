@@ -4,10 +4,11 @@
 \alias{ranger}
 \title{Ranger}
 \usage{
-ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
-  importance = "none", write.forest = TRUE, probability = FALSE,
-  min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
-  1, 0.632), case.weights = NULL, splitrule = NULL, num.random.splits = 1,
+ranger(formula = NULL, data = NULL, graph_data = NULL, num.trees = 500,
+  mtry = NULL, importance = "none", subgraph = "bfs",
+  write.forest = TRUE, probability = FALSE, min.node.size = NULL,
+  replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632),
+  case.weights = NULL, splitrule = NULL, num.random.splits = 1,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
@@ -20,11 +21,15 @@ ranger(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
 
 \item{data}{Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).}
 
+\item{graph_data}{Feature interaction graph. Must be two-column character \code{matrix} with feature names corresponding to column names in \code{data}.}
+
 \item{num.trees}{Number of trees.}
 
 \item{mtry}{Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables.}
 
 \item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.}
+
+\item{subgraph}{Feature subgraph selection mode. One of 'bfs', 'dfs', 'random'.}
 
 \item{write.forest}{Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.}
 

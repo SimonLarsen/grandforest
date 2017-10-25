@@ -105,6 +105,15 @@ Rcpp::List rangerCpp(
       data->addSnpData(snp_data.begin(), snp_data.ncol());
     }
 
+    // Initialize graph data
+    if(graph_data.nrow() > 1) {
+      std::vector<std::pair<size_t,size_t>> edges;
+      for(size_t i = 0; i < graph_data.nrow(); ++i) {
+        edges.emplace_back(graph_data(i,0), graph_data(i,1));
+      }
+      graph = new Graph(data->getNumCols(), edges);
+    }
+
     switch (treetype) {
     case TREE_CLASSIFICATION:
       if (probability) {

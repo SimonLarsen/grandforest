@@ -26,6 +26,8 @@ class Graph {
 		size_t edgeCount() const { return num_edges; }
 
 	private:
+		void from_edgelist(size_t num_vertices, const std::vector<std::pair<size_t,size_t>>& edges);
+
 		std::vector<std::set<size_t>> adj;
 		size_t num_vertices;
 		size_t num_edges;

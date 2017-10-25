@@ -32,9 +32,11 @@
 #include <vector>
 #include <random>
 #include <iostream>
+#include <set>
 
 #include "globals.h"
 #include "Data.h"
+#include "Graph.h"
 
 class Tree {
 public:
@@ -46,10 +48,10 @@ public:
 
   virtual ~Tree();
 
-  void init(Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
+  void init(Data* data, Graph* graph, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
       std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
-      std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
-      bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
+      std::vector<double>* split_select_weights, ImportanceMode importance_mode, SubgraphMode subgraph_mode,
+      uint min_node_size, bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, bool keep_inbag, double sample_fraction, double alpha, double minprop,
       bool holdout, uint num_random_splits);
 
@@ -87,6 +89,13 @@ public:
 
 protected:
   void createPossibleSplitVarSubset(std::vector<size_t>& result);
+
+  void createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> &result);
+
+  void createFeatureSubgraph(std::set<size_t> &result);
+  void findSubgraphBFS(std::set<size_t> &result);
+  void findSubgraphDFS(std::set<size_t> &result);
+  void findSubgraphRandom(std::set<size_t> &result);
 
   bool splitNode(size_t nodeID);
   virtual bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) = 0;
@@ -135,6 +144,9 @@ protected:
   // For terminal nodes the prediction value is saved here
   std::vector<double> split_values;
 
+  // Vector of parent node IDs
+  std::vector<size_t> parent_nodeIDs;
+
   // Vector of left and right child node IDs, 0 for no child
   std::vector<std::vector<size_t>> child_nodeIDs;
 
@@ -156,6 +168,13 @@ protected:
 
   // Pointer to original data
   Data* data;
+  Graph* graph;
+
+  // Feature subgraph
+  std::set<size_t> subgraph;
+
+  // Feature subgraph selection mode
+  SubgraphMode subgraph_mode;
 
   // Variable importance for all variables
   std::vector<double>* variable_importance;

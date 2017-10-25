@@ -80,6 +80,13 @@ enum ImportanceMode {
 };
 const uint MAX_IMP_MODE = 5;
 
+enum SubgraphMode {
+    SUBGRAPH_BFS = 1,
+    SUBGRAPH_DFS = 2,
+    SUBGRAPH_RANDOM = 3
+};
+const uint MAX_SUBGRAPH_MODE = 3;
+
 // Split mode
 enum SplitRule {
   LOGRANK = 1,
@@ -99,6 +106,7 @@ enum PredictionType {
 const uint DEFAULT_NUM_TREE = 500;
 const uint DEFAULT_NUM_THREADS = 0;
 const ImportanceMode DEFAULT_IMPORTANCE_MODE = IMP_NONE;
+const SubgraphMode DEFAULT_SUBGRAPH_MODE = SUBGRAPH_BFS;
 
 const uint DEFAULT_MIN_NODE_SIZE_CLASSIFICATION = 1;
 const uint DEFAULT_MIN_NODE_SIZE_REGRESSION = 5;

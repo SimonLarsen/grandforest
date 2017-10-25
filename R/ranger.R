@@ -77,9 +77,11 @@
 ##' @title Ranger
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
+##' @param graph_data Feature interaction graph. Must be two-column character \code{matrix} with feature names corresponding to column names in \code{data}.
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
-##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival. 
+##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.
+##' @param subgraph Feature subgraph selection mode. One of 'bfs', 'dfs', 'random'.
 ##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
@@ -177,8 +179,10 @@
 ##' @import utils
 ##' @importFrom Matrix Matrix
 ##' @export
-ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
-                   importance = "none", write.forest = TRUE, probability = FALSE,
+ranger <- function(formula = NULL, data = NULL, graph_data = NULL,
+                   num.trees = 500, mtry = NULL,
+                   importance = "none", subgraph = "bfs",
+                   write.forest = TRUE, probability = FALSE,
                    min.node.size = NULL, replace = TRUE, 
                    sample.fraction = ifelse(replace, 1, 0.632), 
                    case.weights = NULL, splitrule = NULL, 
@@ -242,8 +246,7 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   ## Check missing values
   if (any(is.na(data.selected))) {
     offending_columns <- colnames(data.selected)[colSums(is.na(data.selected)) > 0]
-    stop("Missing data in columns: ",
-         paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
+    stop("Missing data in columns: ", paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
   
   ## Treetype
@@ -364,6 +367,13 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   if (length(all.independent.variable.names) < 1) {
     stop("Error: No covariates found.")
   }
+
+  ## Feature graph data
+  graph <- matrix()
+  if(!is.null(graph_data)) {
+    graph <- apply(graph_data, 2, match, variable.names) - 1
+    graph <- graph[!is.na(graph[,1]) & !is.na(graph[,2]),]
+  }
   
   ## Number of trees
   if (!is.numeric(num.trees) || num.trees < 1) {
@@ -425,6 +435,17 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
     }
   } else {
     stop("Error: Unknown importance mode.")
+  }
+
+  ## Feature subgraph mode
+  if(is.null(subgraph) || subgraph == "bfs") {
+    subgraph.mode <- 1
+  } else if(subgraph == "dfs") {
+    subgraph.mode <- 2
+  } else if(subgraph == "random") {
+    subgraph.mode <- 3
+  } else {
+    stop("Error: Unknown feature subgraph mode.")
   }
   
   ## Case weights: NULL for no weights
@@ -619,8 +640,9 @@ ranger <- function(formula = NULL, data = NULL, num.trees = 500, mtry = NULL,
   rm("data.selected")
 
   ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
-                      num.trees, verbose, seed, num.threads, write.forest, importance.mode,
+  result <- rangerCpp(treetype, dependent.variable.name, data.final, graph, variable.names,
+                      mtry, num.trees, verbose, seed, num.threads, write.forest,
+                      importance.mode, subgraph.mode,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, loaded.forest, snp.data,

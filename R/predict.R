@@ -256,9 +256,11 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Defaults for variables not needed
+  graph <- NULL
   dependent.variable.name <- "none"
   mtry <- 0
   importance <- 0
+  subgraph <- 0
   min.node.size <- 0
   split.select.weights <- list(c(0, 0))
   use.split.select.weights <- FALSE
@@ -293,8 +295,8 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
   
   ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, data.final, variable.names, mtry,
-                      num.trees, verbose, seed, num.threads, write.forest, importance,
+  result <- rangerCpp(treetype, dependent.variable.name, data.final, graph, variable.names, mtry,
+                      num.trees, verbose, seed, num.threads, write.forest, importance, subgraph,
                       min.node.size, split.select.weights, use.split.select.weights,
                       always.split.variables, use.always.split.variables,
                       status.variable.name, prediction.mode, forest, snp.data, replace, probability,

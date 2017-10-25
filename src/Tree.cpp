@@ -27,37 +27,40 @@
  #-------------------------------------------------------------------------------*/
 
 #include <iterator>
+#include <queue>
+#include <stack>
 
 #include "Tree.h"
 #include "utility.h"
 
 Tree::Tree() :
-    dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
-        0), split_select_weights(0), case_weights(0), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(
-        0), importance_mode(DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(1), memory_saving_splitting(
-        false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(
-        DEFAULT_NUM_RANDOM_SPLITS) {
-}
+    dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0),
+    split_select_varIDs(0), split_select_weights(0), case_weights(0), oob_sampleIDs(0), holdout(false), keep_inbag(false),
+    data(0), graph(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), subgraph_mode(DEFAULT_SUBGRAPH_MODE),
+    sample_with_replacement(true), sample_fraction(1), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE),
+    alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS)
+{ }
 
-Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs,
-    std::vector<double>& split_values) :
-    dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0), split_select_varIDs(
-        0), split_select_weights(0), case_weights(0), split_varIDs(split_varIDs), split_values(split_values), child_nodeIDs(
-        child_nodeIDs), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), variable_importance(0), importance_mode(
-        DEFAULT_IMPORTANCE_MODE), sample_with_replacement(true), sample_fraction(1), memory_saving_splitting(false), splitrule(
-        DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS) {
-}
+Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs, std::vector<double>& split_values) :
+    dependent_varID(0), mtry(0), num_samples(0), num_samples_oob(0), min_node_size(0), deterministic_varIDs(0),
+    split_select_varIDs(0), split_select_weights(0), case_weights(0), split_varIDs(split_varIDs), split_values(split_values),
+    child_nodeIDs(child_nodeIDs), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), graph(0), variable_importance(0),
+    importance_mode(DEFAULT_IMPORTANCE_MODE), subgraph_mode(DEFAULT_SUBGRAPH_MODE), sample_with_replacement(true),
+    sample_fraction(1), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA),
+    minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS)
+{ }
 
 Tree::~Tree() {
 }
 
-void Tree::init(Data* data, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
+void Tree::init(Data* data, Graph* graph, uint mtry, size_t dependent_varID, size_t num_samples, uint seed,
     std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
-    std::vector<double>* split_select_weights, ImportanceMode importance_mode, uint min_node_size,
+    std::vector<double>* split_select_weights, ImportanceMode importance_mode, SubgraphMode subgraph_mode, uint min_node_size,
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
     bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits) {
 
   this->data = data;
+  this->graph = graph;
   this->mtry = mtry;
   this->dependent_varID = dependent_varID;
   this->num_samples = num_samples;
@@ -75,6 +78,7 @@ void Tree::init(Data* data, uint mtry, size_t dependent_varID, size_t num_sample
   this->split_select_varIDs = split_select_varIDs;
   this->split_select_weights = split_select_weights;
   this->importance_mode = importance_mode;
+  this->subgraph_mode = subgraph_mode;
   this->min_node_size = min_node_size;
   this->sample_with_replacement = sample_with_replacement;
   this->splitrule = splitrule;
@@ -90,10 +94,14 @@ void Tree::init(Data* data, uint mtry, size_t dependent_varID, size_t num_sample
 }
 
 void Tree::grow(std::vector<double>* variable_importance) {
-
   this->variable_importance = variable_importance;
 
-// Bootstrap, dependent if weighted or not and with or without replacement
+  if(graph != NULL) {
+      subgraph.clear();
+      createFeatureSubgraph(subgraph);
+  }
+
+  // Bootstrap, dependent if weighted or not and with or without replacement
   if (case_weights->empty()) {
     if (sample_with_replacement) {
       bootstrap();
@@ -236,7 +244,6 @@ void Tree::appendToFile(std::ofstream& file) {
 }
 
 void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
-
   size_t num_vars = data->getNumCols();
 
   // For corrected Gini importance add dummy variables
@@ -258,11 +265,141 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
   }
 }
 
-bool Tree::splitNode(size_t nodeID) {
+void Tree::createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> &result) {
+    // root node
+    if(nodeID == 0) {
+        std::copy(subgraph.begin(), subgraph.end(), std::back_inserter(result));
+    } else {
+        size_t parentID = parent_nodeIDs[nodeID];
+        size_t parent_varID = split_varIDs[parentID];
 
-  // Select random subset of variables to possibly split at
+        const std::set<size_t> adj = graph->adjacent(parent_varID);
+        result.resize(adj.size());
+
+        std::vector<size_t>::iterator result_end = std::set_intersection(adj.begin(), adj.end(), subgraph.begin(), subgraph.end(), result.begin());
+        result.resize(result_end - result.begin());
+    }
+}
+
+void Tree::createFeatureSubgraph(std::set<size_t> &result) {
+    if(subgraph_mode == SUBGRAPH_BFS) {
+        findSubgraphBFS(result);
+    } else if(subgraph_mode == SUBGRAPH_DFS) {
+        findSubgraphDFS(result);
+    } else {
+        findSubgraphRandom(result);
+    }
+}
+
+void Tree::findSubgraphBFS(std::set<size_t> &result) {
+    std::queue<size_t> open;
+    std::vector<bool> marked(graph->vertexCount(), false);
+
+    // Mark no split variables to avoid selection
+    for(size_t i : data->getNoSplitVariables()) {
+        marked[i] = true;
+    }
+
+    std::uniform_int_distribution<size_t> start_dist(0, graph->vertexCount()-1);
+    size_t start_node;
+    do {
+        start_node = start_dist(random_number_generator);
+    } while(marked[start_node] == true);
+
+    marked[start_node] = true;
+    open.push(start_node);
+
+    while(!open.empty() && result.size() < mtry) {
+        size_t p = open.front();
+        open.pop();
+
+        for(size_t c : graph->adjacent(p)) {
+            if(marked[c] == false) {
+                open.push(c);
+                marked[c] = true;
+            }
+        }
+        result.insert(p);
+    }
+}
+
+void Tree::findSubgraphDFS(std::set<size_t> &result) {
+    std::stack<size_t> open;
+    std::vector<bool> marked(graph->vertexCount(), false);
+
+    // Mark no split variables to avoid selection
+    for(size_t i : data->getNoSplitVariables()) {
+        marked[i] = true;
+    }
+
+    std::uniform_int_distribution<size_t> start_dist(0, graph->vertexCount()-1);
+    size_t start_node;
+    do {
+        start_node = start_dist(random_number_generator);
+    } while(marked[start_node] == true);
+
+    marked[start_node] = true;
+    open.push(start_node);
+
+    while(!open.empty() && result.size() < mtry) {
+        size_t p = open.top();
+        open.pop();
+
+        for(size_t c : graph->adjacent(p)) {
+            if(marked[c] == false) {
+                open.push(c);
+                marked[c] = true;
+            }
+        }
+        result.insert(p);
+    }
+}
+
+void Tree::findSubgraphRandom(std::set<size_t> &result) {
+    std::vector<size_t> open;
+    std::vector<bool> marked(graph->vertexCount(), false);
+
+    // Mark no split variables to avoid selection
+    for(size_t i : data->getNoSplitVariables()) {
+        marked[i] = true;
+    }
+
+    std::uniform_int_distribution<size_t> start_dist(0, graph->vertexCount()-1);
+    size_t start_node;
+    do {
+        start_node = start_dist(random_number_generator);
+    } while(marked[start_node] == true);
+
+    marked[start_node] = true;
+    open.push_back(start_node);
+
+    while(!open.empty() && result.size() < mtry) {
+        std::uniform_int_distribution<size_t> open_dist(0, open.size()-1);
+        size_t pi = open_dist(random_number_generator);
+
+        size_t p = open[pi];
+        open.erase(open.begin() + pi);
+
+        for(size_t c : graph->adjacent(p)) {
+            if(marked[c] == false) {
+                open.push_back(c);
+                marked[c] = true;
+            }
+        }
+        result.insert(p);
+    }
+}
+
+bool Tree::splitNode(size_t nodeID) {
   std::vector<size_t> possible_split_varIDs;
-  createPossibleSplitVarSubset(possible_split_varIDs);
+
+  if(graph != NULL) {
+      // Select variables in subgraph adjacent to parent node
+      createPossibleSplitVarSubsetGraph(nodeID, possible_split_varIDs);
+  } else {
+      // Select random subset of variables to possibly split at
+      createPossibleSplitVarSubset(possible_split_varIDs);
+  }
 
   // Call subclass method, sets split_varIDs and split_values
   bool stop = splitNodeInternal(nodeID, possible_split_varIDs);
@@ -281,10 +418,12 @@ bool Tree::splitNode(size_t nodeID) {
   size_t left_child_nodeID = sampleIDs.size();
   child_nodeIDs[0][nodeID] = left_child_nodeID;
   createEmptyNode();
+  parent_nodeIDs[left_child_nodeID] = nodeID;
 
   size_t right_child_nodeID = sampleIDs.size();
   child_nodeIDs[1][nodeID] = right_child_nodeID;
   createEmptyNode();
+  parent_nodeIDs[right_child_nodeID] = nodeID;
 
   // For each sample in node, assign to left or right child
   if (data->isOrderedVariable(split_varID)) {
@@ -322,6 +461,7 @@ void Tree::createEmptyNode() {
   split_values.push_back(0);
   child_nodeIDs[0].push_back(0);
   child_nodeIDs[1].push_back(0);
+  parent_nodeIDs.push_back(0);
   sampleIDs.push_back(std::vector<size_t>());
 
   createEmptyNodeInternal();

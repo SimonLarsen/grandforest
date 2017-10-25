@@ -43,23 +43,25 @@
  
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
-Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
-    Rcpp::NumericMatrix input_data, std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose,
-    uint seed, uint num_threads, bool write_forest, uint importance_mode_r, uint min_node_size,
-    std::vector<std::vector<double>>& split_select_weights, bool use_split_select_weights,
-    std::vector<std::string>& always_split_variable_names, bool use_always_split_variable_names,
-    std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,
-    bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
-    bool use_unordered_variable_names, bool save_memory, uint splitrule_r, 
-    std::vector<double>& case_weights, bool use_case_weights, bool predict_all, 
-    bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r, 
-    uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data) {
-
+Rcpp::List rangerCpp(
+        uint treetype, std::string dependent_variable_name,
+        Rcpp::NumericMatrix input_data, Rcpp::NumericMatrix graph_data,
+        std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose,
+        uint seed, uint num_threads, bool write_forest, uint importance_mode_r, uint subgraph_mode_r,
+        uint min_node_size, std::vector<std::vector<double>>& split_select_weights, bool use_split_select_weights,
+        std::vector<std::string>& always_split_variable_names, bool use_always_split_variable_names,
+        std::string status_variable_name, bool prediction_mode, Rcpp::List loaded_forest, Rcpp::RawMatrix snp_data,
+        bool sample_with_replacement, bool probability, std::vector<std::string>& unordered_variable_names,
+        bool use_unordered_variable_names, bool save_memory, uint splitrule_r,
+        std::vector<double>& case_weights, bool use_case_weights, bool predict_all,
+        bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
+        uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data
+) {
   Rcpp::List result;
   Forest* forest = 0;
   Data* data = 0;
+  Graph* graph = 0;
   try {
-
     // Empty split select weights and always split variables if not used
     if (!use_split_select_weights) {
       split_select_weights.clear();
@@ -123,14 +125,16 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
     }
 
     ImportanceMode importance_mode = (ImportanceMode) importance_mode_r;
+    SubgraphMode subgraph_mode = (SubgraphMode) subgraph_mode_r;
     SplitRule splitrule = (SplitRule) splitrule_r;
     PredictionType prediction_type = (PredictionType) prediction_type_r;
 
     // Init Ranger
-    forest->initR(dependent_variable_name, data, mtry, num_trees, verbose_out, seed, num_threads,
-        importance_mode, min_node_size, split_select_weights, always_split_variable_names, status_variable_name,
-        prediction_mode, sample_with_replacement, unordered_variable_names, save_memory, splitrule, case_weights, 
-        predict_all, keep_inbag, sample_fraction, alpha, minprop, holdout, prediction_type, num_random_splits);
+    forest->initR(dependent_variable_name, data, graph, mtry, num_trees, verbose_out, seed, num_threads,
+                  importance_mode, subgraph_mode, min_node_size, split_select_weights, always_split_variable_names,
+                  status_variable_name, prediction_mode, sample_with_replacement, unordered_variable_names,
+                  save_memory, splitrule, case_weights, predict_all, keep_inbag, sample_fraction, alpha, minprop,
+                  holdout, prediction_type, num_random_splits);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {
@@ -237,12 +241,14 @@ Rcpp::List rangerCpp(uint treetype, std::string dependent_variable_name,
 
     delete forest;
     delete data;
+    if(graph != 0) delete graph;
   } catch (std::exception& e) {
     if (strcmp(e.what(), "User interrupt.") != 0) {
       Rcpp::Rcerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
     }
     delete forest;
     delete data;
+    if(graph != 0) delete graph;
     return result;
   }
 

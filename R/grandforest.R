@@ -26,6 +26,7 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
+##' Grand Forest is a graph-guided random forest algorithm based on Ranger.
 ##' Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 ##' Classification, regression, and survival forests are supported.
 ##' Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).
@@ -63,7 +64,7 @@
 ##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
 ##' Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing. 
 ##' 
-##' For GWAS data consider combining \code{ranger} with the \code{GenABEL} package. 
+##' For GWAS data consider combining \code{grandforest} with the \code{GenABEL} package. 
 ##' See the Examples section below for a demonstration using \code{Plink} data.
 ##' All SNPs in the \code{GenABEL} object will be used for splitting. 
 ##' To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
@@ -74,7 +75,7 @@
 ##' With recent R versions, multithreading on Windows platforms should just work. 
 ##' If you compile yourself, the new RTools toolchain is required.
 ##' 
-##' @title Ranger
+##' @title GrandForest
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
 ##' @param graph_data Feature interaction graph. Must be two-column character \code{matrix} with feature names corresponding to column names in \code{data}.
@@ -82,7 +83,7 @@
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.
 ##' @param subgraph Feature subgraph selection mode. One of 'bfs', 'dfs', 'random'.
-##' @param write.forest Save \code{ranger.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
+##' @param write.forest Save \code{grandforest.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012). 
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
 ##' @param replace Sample with replacement. 
@@ -105,7 +106,7 @@
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
 ##' @param classification Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.
-##' @return Object of class \code{ranger} with elements
+##' @return Object of class \code{grandforest} with elements
 ##'   \item{\code{forest}}{Saved forest (If write.forest set to TRUE). Note that the variable IDs in the \code{split.varIDs} object do not necessarily represent the column number in R.}
 ##'   \item{\code{predictions}}{Predicted classes/values, based on out of bag samples (classification and regression only).}
 ##'   \item{\code{variable.importance}}{Variable importance for each independent variable.}
@@ -125,30 +126,30 @@
 ##'   \item{\code{num.samples}}{Number of samples.}
 ##'   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
 ##' @examples
-##' require(ranger)
+##' require(grandforest)
 ##'
 ##' ## Classification forest with default settings
-##' ranger(Species ~ ., data = iris)
+##' grandforest(Species ~ ., data = iris, graph_data = edges)
 ##'
 ##' ## Prediction
 ##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 ##' iris.train <- iris[train.idx, ]
 ##' iris.test <- iris[-train.idx, ]
-##' rg.iris <- ranger(Species ~ ., data = iris.train, write.forest = TRUE)
+##' rg.iris <- grandforest(Species ~ ., data = iris.train, graph_data = edges, write.forest = TRUE)
 ##' pred.iris <- predict(rg.iris, dat = iris.test)
 ##' table(iris.test$Species, pred.iris$predictions)
 ##'
 ##' ## Variable importance
-##' rg.iris <- ranger(Species ~ ., data = iris, importance = "impurity")
+##' rg.iris <- grandforest(Species ~ ., data = iris, graph_data = edges, importance = "impurity")
 ##' rg.iris$variable.importance
 ##'
 ##' ## Survival forest
 ##' require(survival)
-##' rg.veteran <- ranger(Surv(time, status) ~ ., data = veteran)
+##' rg.veteran <- grandforest(Surv(time, status) ~ ., data = veteran, graph_data = edges)
 ##' plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
 ##'
 ##' ## Alternative interface
-##' ranger(dependent.variable.name = "Species", data = iris)
+##' grandforest(dependent.variable.name = "Species", data = iris, graph_data = edges)
 ##' 
 ##' \dontrun{
 ##' ## Use GenABEL interface to read Plink data into R and grow a classification forest
@@ -157,7 +158,7 @@
 ##' convert.snp.ped("data.ped", "data.map", "data.raw")
 ##' dat.gwaa <- load.gwaa.data("data.pheno", "data.raw")
 ##' phdata(dat.gwaa)$trait <- factor(phdata(dat.gwaa)$trait)
-##' ranger(trait ~ ., data = dat.gwaa)
+##' grandforest(trait ~ ., data = dat.gwaa, graph_data = edges)
 ##' }
 ##'
 ##' @author Marvin N. Wright
@@ -172,29 +173,29 @@
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
 ##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{http://dx.doi.org/10.1007/s10994-006-6226-1}. 
 ##'   }
-##' @seealso \code{\link{predict.ranger}}
-##' @useDynLib ranger
+##' @seealso \code{\link{predict.grandforest}}
+##' @useDynLib grandforest
 ##' @importFrom Rcpp evalCpp
 ##' @import stats 
 ##' @import utils
 ##' @importFrom Matrix Matrix
 ##' @export
-ranger <- function(formula = NULL, data = NULL, graph_data = NULL,
-                   num.trees = 500, mtry = NULL,
-                   importance = "none", subgraph = "bfs",
-                   write.forest = TRUE, probability = FALSE,
-                   min.node.size = NULL, replace = TRUE, 
-                   sample.fraction = ifelse(replace, 1, 0.632), 
-                   case.weights = NULL, splitrule = NULL, 
-                   num.random.splits = 1, alpha = 0.5, minprop = 0.1,
-                   split.select.weights = NULL, always.split.variables = NULL,
-                   respect.unordered.factors = NULL,
-                   scale.permutation.importance = FALSE,
-                   keep.inbag = FALSE, holdout = FALSE,
-                   num.threads = NULL, save.memory = FALSE,
-                   verbose = TRUE, seed = NULL, 
-                   dependent.variable.name = NULL, status.variable.name = NULL, 
-                   classification = NULL) {
+grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
+                        num.trees = 500, mtry = NULL,
+                        importance = "none", subgraph = "bfs",
+                        write.forest = TRUE, probability = FALSE,
+                        min.node.size = NULL, replace = TRUE, 
+                        sample.fraction = ifelse(replace, 1, 0.632), 
+                        case.weights = NULL, splitrule = NULL, 
+                        num.random.splits = 1, alpha = 0.5, minprop = 0.1,
+                        split.select.weights = NULL, always.split.variables = NULL,
+                        respect.unordered.factors = NULL,
+                        scale.permutation.importance = FALSE,
+                        keep.inbag = FALSE, holdout = FALSE,
+                        num.threads = NULL, save.memory = FALSE,
+                        verbose = TRUE, seed = NULL, 
+                        dependent.variable.name = NULL, status.variable.name = NULL, 
+                        classification = NULL) {
   
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
@@ -618,7 +619,7 @@ ranger <- function(formula = NULL, data = NULL, graph_data = NULL,
     }
   }
 
-  ## Prediction mode always false. Use predict.ranger() method.
+  ## Prediction mode always false. Use predict.grandforest() method.
   prediction.mode <- FALSE
   predict.all <- FALSE
   prediction.type <- 1
@@ -639,17 +640,17 @@ ranger <- function(formula = NULL, data = NULL, graph_data = NULL,
   ## Clean up
   rm("data.selected")
 
-  ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, data.final, graph, variable.names,
-                      mtry, num.trees, verbose, seed, num.threads, write.forest,
-                      importance.mode, subgraph.mode,
-                      min.node.size, split.select.weights, use.split.select.weights,
-                      always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, loaded.forest, snp.data,
-                      replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
-                      save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                      keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
-                      num.random.splits, sparse.data, use.sparse.data)
+  ## Call Grand Forest
+  result <- grandforestCpp(treetype, dependent.variable.name, data.final, graph, variable.names,
+                           mtry, num.trees, verbose, seed, num.threads, write.forest,
+                           importance.mode, subgraph.mode,
+                           min.node.size, split.select.weights, use.split.select.weights,
+                           always.split.variables, use.always.split.variables,
+                           status.variable.name, prediction.mode, loaded.forest, snp.data,
+                           replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
+                           save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
+                           keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
+                           num.random.splits, sparse.data, use.sparse.data)
   
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -719,7 +720,7 @@ ranger <- function(formula = NULL, data = NULL, graph_data = NULL,
     }
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
-    class(result$forest) <- "ranger.forest"
+    class(result$forest) <- "grandforest.forest"
     
     ## In 'ordered' mode, save covariate levels
     if (respect.unordered.factors == "order" && !is.matrix(data)) {
@@ -727,7 +728,7 @@ ranger <- function(formula = NULL, data = NULL, graph_data = NULL,
     }
   }
   
-  class(result) <- "ranger"
+  class(result) <- "grandforest"
   return(result)
 }
 

@@ -26,17 +26,17 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Print contents of Ranger object.
+##' Print contents of Grand Forest object.
 ##'
 ##'
-##' @title Print Ranger
-##' @param x Object of class 'ranger'.
+##' @title Print Grand Forest
+##' @param x Object of class 'grandforest'.
 ##' @param ... Further arguments passed to or from other methods.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @export
-print.ranger <- function(x, ...) {
-  cat("Ranger result\n\n")
+print.grandforest <- function(x, ...) {
+  cat("Grand Forest result\n\n")
   cat("Call:\n", deparse(x$call), "\n\n")
   cat("Type:                            ", x$treetype, "\n")
   cat("Number of trees:                 ", x$num.trees, "\n")
@@ -61,16 +61,16 @@ print.ranger <- function(x, ...) {
   }
 }
 
-##' Print contents of Ranger forest object.
+##' Print contents of Grand Forest forest object.
 ##'
 ##'
-##' @title Print Ranger forest
-##' @param x Object of class 'ranger.forest'.
+##' @title Print Grand Forest forest
+##' @param x Object of class 'grandforest.forest'.
 ##' @param ... further arguments passed to or from other methods.
 ##' @author Marvin N. Wright
 ##' @export
-print.ranger.forest <- function(x, ...) {
-  cat("Ranger forest object\n\n")
+print.grandforest.forest <- function(x, ...) {
+  cat("Grand Forest object\n\n")
   cat("Type:                         ", x$treetype, "\n")
   cat("Number of trees:              ", x$num.trees, "\n")
   if (x$treetype == "Survival") {
@@ -78,16 +78,16 @@ print.ranger.forest <- function(x, ...) {
   }
 }
 
-##' Print contents of Ranger prediction object.
+##' Print contents of Greand Forest prediction object.
 ##'
 ##'
-##' @title Print Ranger prediction
-##' @param x Object of class 'ranger.prediction'.
+##' @title Print Grand Forest prediction
+##' @param x Object of class 'grandforest.prediction'.
 ##' @param ... further arguments passed to or from other methods.
 ##' @author Marvin N. Wright
 ##' @export
-print.ranger.prediction <- function(x, ...) {
-  cat("Ranger prediction\n\n")
+print.grandforest.prediction <- function(x, ...) {
+  cat("Grand Forest prediction\n\n")
   cat("Type:                            ", x$treetype, "\n")
   cat("Sample size:                     ", x$num.samples, "\n")
   cat("Number of independent variables: ", x$num.independent.variables, "\n")
@@ -96,12 +96,12 @@ print.ranger.prediction <- function(x, ...) {
   }
 }
 
-str.ranger.forest <- function(object, max.level = 2, ...) {
+str.grandforest.forest <- function(object, max.level = 2, ...) {
   class(object) <- "list"
   str(object, max.level = max.level, ...)
 }
 
-str.ranger <- function(object, max.level = 2, ...) {
+str.grandforest <- function(object, max.level = 2, ...) {
   class(object) <- "list"
   str(object, max.level = max.level, ...)
 }

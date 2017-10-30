@@ -2,13 +2,13 @@
 % Please edit documentation in R/importance.R
 \name{importance_pvalues}
 \alias{importance_pvalues}
-\title{ranger variable importance p-values}
+\title{Grand Forest variable importance p-values}
 \usage{
 importance_pvalues(x, method = c("janitza", "altmann"),
   num.permutations = 100, formula = NULL, data = NULL, ...)
 }
 \arguments{
-\item{x}{ranger or holdoutRF object.}
+\item{x}{grandforest or holdoutRF object.}
 
 \item{method}{Method to compute p-values. Use "janitza" for the method by Janitza et al. (2015) or "altmann" for the non-parametric method by Altmann et al. (2010).}
 
@@ -18,7 +18,7 @@ importance_pvalues(x, method = c("janitza", "altmann"),
 
 \item{data}{Training data of class data.frame or matrix. Used in the "altmann" method only.}
 
-\item{...}{Further arguments passed to ranger(). Used in the "altmann" method only.}
+\item{...}{Further arguments passed to grandforest(). Used in the "altmann" method only.}
 }
 \value{
 Variable importance and p-values.
@@ -31,7 +31,7 @@ Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast varia
   Altmann, A., Tolosi, L., Sander, O. & Lengauer, T. (2010). Permutation importance: a corrected feature importance measure, Bioinformatics 26(10):1340-1347.
 }
 \seealso{
-\code{\link{ranger}}
+\code{\link{grandforest}}
 }
 \author{
 Marvin N. Wright

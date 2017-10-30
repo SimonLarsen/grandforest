@@ -43,7 +43,7 @@
  
 // [[Rcpp::depends(RcppEigen)]]
 // [[Rcpp::export]]
-Rcpp::List rangerCpp(
+Rcpp::List grandforestCpp(
         uint treetype, std::string dependent_variable_name,
         Rcpp::NumericMatrix input_data, Rcpp::NumericMatrix graph_data,
         std::vector<std::string> variable_names, uint mtry, uint num_trees, bool verbose,
@@ -138,7 +138,7 @@ Rcpp::List rangerCpp(
     SplitRule splitrule = (SplitRule) splitrule_r;
     PredictionType prediction_type = (PredictionType) prediction_type_r;
 
-    // Init Ranger
+    // Init Grand Forest
     forest->initR(dependent_variable_name, data, graph, mtry, num_trees, verbose_out, seed, num_threads,
                   importance_mode, subgraph_mode, min_node_size, split_select_weights, always_split_variable_names,
                   status_variable_name, prediction_mode, sample_with_replacement, unordered_variable_names,
@@ -176,7 +176,7 @@ Rcpp::List rangerCpp(
       }
     }
     
-    // Run Ranger
+    // Run Grand Forest
     forest->run(false);
     
     if (use_split_select_weights && importance_mode != IMP_NONE) {
@@ -253,7 +253,7 @@ Rcpp::List rangerCpp(
     if(graph != 0) delete graph;
   } catch (std::exception& e) {
     if (strcmp(e.what(), "User interrupt.") != 0) {
-      Rcpp::Rcerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
+      Rcpp::Rcerr << "Error: " << e.what() << " Grand Forest will EXIT now." << std::endl;
     }
     delete forest;
     delete data;

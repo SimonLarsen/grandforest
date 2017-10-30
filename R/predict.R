@@ -26,27 +26,27 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Prediction with new data and a saved forest from Ranger.
+##' Prediction with new data and a saved forest from Grand Forest
 ##' 
 ##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
 ##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
-##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the grandforest object.
 ##'
-##' @title Ranger prediction
-##' @param object Ranger \code{ranger.forest} object.
+##' @title Grand Forest prediction
+##' @param object Grand Forest \code{grandforest.forest} object.
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
-##' @param seed Random seed used in Ranger.
+##' @param seed Random seed used in grandforest
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
 ##' @param inbag.counts Number of times the observations are in-bag in the trees.
 ##' @param ... further arguments passed to or from other methods.
-##' @return Object of class \code{ranger.prediction} with elements
+##' @return Object of class \code{grandforest.prediction} with elements
 ##'   \tabular{ll}{
 ##'       \code{predictions}    \tab Predicted classes/values (only for classification and regression)  \cr
 ##'       \code{unique.death.times} \tab Unique death times (only for survival). \cr
@@ -62,16 +62,17 @@
 ##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
 ##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
 ##'   }
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @importFrom Matrix Matrix
 ##' @export
-predict.ranger.forest <- function(object, data, predict.all = FALSE,
-                                  num.trees = object$num.trees, 
-                                  type = "response",
-                                  seed = NULL, num.threads = NULL,
-                                  verbose = TRUE, inbag.counts = NULL,...) {
-
+predict.grandforest.forest <- function(
+  object, data, predict.all = FALSE,
+  num.trees = object$num.trees, 
+  type = "response",
+  seed = NULL, num.threads = NULL,
+  verbose = TRUE, inbag.counts = NULL, ...
+) {
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- snp.names(data)
@@ -86,7 +87,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Check forest argument
-  if (class(object) != "ranger.forest") {
+  if (class(object) != "grandforest.forest") {
     stop("Error: Invalid class of input object.")
   } else {
     forest <- object
@@ -102,7 +103,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     stop("Error: Invalid forest object.")
   }
   
-  ## Check for old ranger version
+  ## Check for old grand forest version
   if (length(forest$child.nodeIDs) != forest$num.trees || length(forest$child.nodeIDs[[1]]) != 2) {
     stop("Error: Invalid forest object. Is the forest grown in ranger version <0.3.9? Try to predict with the same version the forest was grown.")
   }
@@ -123,7 +124,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   
   ## Type "se" requires keep.inbag=TRUE
   if (type == "se" && is.null(inbag.counts)) {
-    stop("Error: No saved inbag counts in ranger object. Please set keep.inbag=TRUE when calling ranger.")
+    stop("Error: No saved inbag counts in grandforest object. Please set keep.inbag=TRUE when calling grandforest")
   }
   
   ## Set predict.all if type is "se"
@@ -256,7 +257,7 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
   }
 
   ## Defaults for variables not needed
-  graph <- NULL
+  graph <- matrix()
   dependent.variable.name <- "none"
   mtry <- 0
   importance <- 0
@@ -294,15 +295,15 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     use.sparse.data <- FALSE
   }
   
-  ## Call Ranger
-  result <- rangerCpp(treetype, dependent.variable.name, data.final, graph, variable.names, mtry,
-                      num.trees, verbose, seed, num.threads, write.forest, importance, subgraph,
-                      min.node.size, split.select.weights, use.split.select.weights,
-                      always.split.variables, use.always.split.variables,
-                      status.variable.name, prediction.mode, forest, snp.data, replace, probability,
-                      unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
-                      case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                      alpha, minprop, holdout, prediction.type, num.random.splits, sparse.data, use.sparse.data)
+  ## Call Grand Forest
+  result <- grandforestCpp(treetype, dependent.variable.name, data.final, graph, variable.names, mtry,
+                           num.trees, verbose, seed, num.threads, write.forest, importance, subgraph,
+                           min.node.size, split.select.weights, use.split.select.weights,
+                           always.split.variables, use.always.split.variables,
+                           status.variable.name, prediction.mode, forest, snp.data, replace, probability,
+                           unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
+                           case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
+                           alpha, minprop, holdout, prediction.type, num.random.splits, sparse.data, use.sparse.data)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
@@ -389,30 +390,30 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
     result$predictions <- yhat
   }
 
-  class(result) <- "ranger.prediction"
+  class(result) <- "grandforest.prediction"
   return(result)
 }
 
-##' Prediction with new data and a saved forest from Ranger.
+##' Prediction with new data and a saved forest from Grand Forest
 ##' 
 ##' For \code{type = 'response'} (the default), the predicted classes (classification), predicted numeric values (regression), predicted probabilities (probability estimation) or survival probabilities (survival) are returned. 
 ##' For \code{type = 'se'}, the standard error of the predictions are returned (regression only). The jackknife-after-bootstrap is used to estimate the standard errors based on out-of-bag predictions. See Wager et al. (2014) for details.
 ##' For \code{type = 'terminalNodes'}, the IDs of the terminal node in each tree for each observation in the given dataset are returned.
 ##' 
 ##' For classification and \code{predict.all = TRUE}, a factor levels are returned as numerics.
-##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+##' To retrieve the corresponding factor levels, use \code{rf$forest$levels}, if \code{rf} is the grandforest object.
 ##'
-##' @title Ranger prediction
-##' @param object Ranger \code{ranger} object.
+##' @title Grand Forest prediction
+##' @param object Grand Forest \code{grandforest} object.
 ##' @param data New test data of class \code{data.frame} or \code{gwaa.data} (GenABEL).
 ##' @param predict.all Return individual predictions for each tree instead of aggregated predictions for all trees. Return a matrix (sample x tree) for classification and regression, a 3d array for probability estimation (sample x class x tree) and survival (sample x time x tree).
 ##' @param num.trees Number of trees used for prediction. The first \code{num.trees} in the forest are used.
 ##' @param type Type of prediction. One of 'response', 'se', 'terminalNodes' with default 'response'. See below for details.
-##' @param seed Random seed used in Ranger.
+##' @param seed Random seed used in Grand Forest
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param verbose Verbose output on or off.
 ##' @param ... further arguments passed to or from other methods.
-##' @return Object of class \code{ranger.prediction} with elements
+##' @return Object of class \code{grandforest.prediction} with elements
 ##'   \tabular{ll}{
 ##'       \code{predictions}    \tab Predicted classes/values (only for classification and regression)  \cr
 ##'       \code{unique.death.times} \tab Unique death times (only for survival). \cr
@@ -428,17 +429,17 @@ predict.ranger.forest <- function(object, data, predict.all = FALSE,
 ##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{http://dx.doi.org/10.18637/jss.v077.i01}.
 ##'   \item Wager, S., Hastie T., & Efron, B. (2014). Confidence Intervals for Random Forests: The Jackknife and the Infinitesimal Jackknife. J Mach Learn Res 15:1625-1651. \url{http://jmlr.org/papers/v15/wager14a.html}.
 ##'   }
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @export
-predict.ranger <- function(object, data, predict.all = FALSE,
-                           num.trees = object$num.trees,
-                           type = "response",
-                           seed = NULL, num.threads = NULL,
-                           verbose = TRUE, ...) {
+predict.grandforest <- function(object, data, predict.all = FALSE,
+                                num.trees = object$num.trees,
+                                type = "response",
+                                seed = NULL, num.threads = NULL,
+                                verbose = TRUE, ...) {
   forest <- object$forest
   if (is.null(forest)) {
-    stop("Error: No saved forest in ranger object. Please set write.forest to TRUE when calling ranger.")
+    stop("Error: No saved forest in grandforest object. Please set write.forest to TRUE when calling grandforest")
   }
   if (object$importance.mode %in% c("impurity_corrected", "impurity_unbiased")) {
     warning("Forest was grown with 'impurity_corrected' variable importance. For prediction it is STRONGLY advised to grow another forest without this importance setting.")

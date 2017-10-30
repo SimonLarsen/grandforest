@@ -29,20 +29,20 @@
 ##' @export
 importance <- function(x, ...)  UseMethod("importance")
 
-##' Extract variable importance of ranger object.
+##' Extract variable importance of grandforest object.
 ##'
 ##'
-##' @title ranger variable importance
-##' @param x ranger object.
+##' @title Grand Forest variable importance
+##' @param x grandforest object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Variable importance measures.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @aliases importance
 ##' @export 
-importance.ranger <- function(x, ...) {
-  if (class(x) != "ranger") {
-    stop("Object ist no ranger object.")
+importance.grandforest <- function(x, ...) {
+  if (class(x) != "grandforest") {
+    stop("Object is not a grandforest object.")
   }
   if (is.null(x$variable.importance) || length(x$variable.importance) < 1) {
     stop("No variable importance found. Please use 'importance' option when growing the forest.")
@@ -53,23 +53,23 @@ importance.ranger <- function(x, ...) {
 ##' Compute variable importance with p-values.
 ##'
 ##'
-##' @title ranger variable importance p-values
-##' @param x ranger or holdoutRF object.
+##' @title Grand Forest variable importance p-values
+##' @param x grandforest or holdoutRF object.
 ##' @param method Method to compute p-values. Use "janitza" for the method by Janitza et al. (2015) or "altmann" for the non-parametric method by Altmann et al. (2010).
 ##' @param num.permutations Number of permutations. Used in the "altmann" method only.
 ##' @param formula Object of class formula or character describing the model to fit. Used in the "altmann" method only.
 ##' @param data Training data of class data.frame or matrix. Used in the "altmann" method only.
-##' @param ... Further arguments passed to ranger(). Used in the "altmann" method only.
+##' @param ... Further arguments passed to grandforest(). Used in the "altmann" method only.
 ##' @return Variable importance and p-values.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @references
 ##'   Janitza, S., Celik, E. & Boulesteix, A.-L., (2015). A computationally fast variable importance test for random forests for high-dimensional data. Adv Data Anal Classif \url{http://dx.doi.org/10.1007/s11634-016-0276-4}. \cr
 ##'   Altmann, A., Tolosi, L., Sander, O. & Lengauer, T. (2010). Permutation importance: a corrected feature importance measure, Bioinformatics 26(10):1340-1347.
 ##' @export 
 importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutations = 100, formula = NULL, data = NULL, ...) {
-  if (class(x) != "ranger" & class(x) != "holdoutRF") {
-    stop("Object is no ranger or holdoutRF object.")
+  if (class(x) != "grandforest" & class(x) != "holdoutRF") {
+    stop("Object is not a grandforest or holdoutRF object.")
   }
   if (x$importance.mode == "none" || is.null(x$variable.importance) || length(x$variable.importance) < 1) {
     stop("No variable importance found. Please use 'importance' option when growing the forest.")
@@ -102,7 +102,7 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
       warning("Only few negative importance values found, inaccurate p-values. Consider the 'altmann' approach.")
     }
   } else if (method == "altmann") {
-    if (class(x) != "ranger") {
+    if (class(x) != "grandforest") {
       stop("Altmann method not available for holdoutRF objects.")
     }
     if (is.null(formula) || is.null(data)) {
@@ -118,8 +118,8 @@ importance_pvalues <- function(x, method = c("janitza", "altmann"), num.permutat
     vimp <- sapply(1:num.permutations, function(i) {
       dat <- data
       dat[, dependent.variable.name] <- dat[sample(nrow(dat)), dependent.variable.name]
-      ranger(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
-             importance = x$importance.mode, replace = x$replace, ...)$variable.importance
+      grandforest(formula, dat, num.trees = x$num.trees, mtry = x$mtry, min.node.size = x$min.node.size, 
+                  importance = x$importance.mode, replace = x$replace, ...)$variable.importance
     })
     
     ## Compute p-value

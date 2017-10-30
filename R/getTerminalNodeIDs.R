@@ -31,14 +31,14 @@
 ##' This function calls predict() now. 
 ##'
 ##' @title Get terminal node IDs (deprecated)
-##' @param rf \code{ranger} object.
+##' @param rf \code{grandforest} object.
 ##' @param dat New dataset. Terminal node IDs for this dataset are obtained. 
 ##'
 ##' @return Matrix with terminal nodeIDs for all observations in dataset and trees.
 ##'
 ##' @examples
-##' library(ranger)
-##' rf <- ranger(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
+##' library(grandforest)
+##' rf <- grandforest(Species ~ ., data = iris, num.trees = 5, write.forest = TRUE)
 ##' getTerminalNodeIDs(rf, iris)
 ##' @export
 getTerminalNodeIDs <- function(rf, dat) {

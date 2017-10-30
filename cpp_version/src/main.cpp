@@ -83,8 +83,8 @@ int main(int argc, char **argv) {
       verbose_out = logfile;
     }
 
-    // Call Ranger
-    *verbose_out << "Starting Ranger." << std::endl;
+    // Call Grand Forest
+    *verbose_out << "Starting Grand Forest." << std::endl;
     forest->initCpp(arg_handler.depvarname, arg_handler.memmode, arg_handler.file, arg_handler.mtry,
         arg_handler.outprefix, arg_handler.ntree, verbose_out, arg_handler.seed, arg_handler.nthreads,
         arg_handler.predict, arg_handler.impmeasure, arg_handler.targetpartitionsize, arg_handler.splitweights,
@@ -98,11 +98,11 @@ int main(int argc, char **argv) {
       forest->saveToFile();
     }
     forest->writeOutput();
-    *verbose_out << "Finished Ranger." << std::endl;
+    *verbose_out << "Finished Grand Forest." << std::endl;
 
     delete forest;
   } catch (std::exception& e) {
-    std::cerr << "Error: " << e.what() << " Ranger will EXIT now." << std::endl;
+    std::cerr << "Error: " << e.what() << " Grand Forest will EXIT now." << std::endl;
     delete forest;
     return -1;
   }

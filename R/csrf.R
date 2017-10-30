@@ -65,8 +65,7 @@
 ##' @export
 csrf <- function(formula, training_data, test_data, params1 = list(), params2 = list()) {
   ## Grow a random forest on the training data to obtain weights
-  rf.proximity <- do.call(ranger, c(list(formula = formula, data = training_data, 
-                                         write.forest = TRUE), params1))
+  rf.proximity <- do.call(grandforest, c(list(formula = formula, data = training_data, write.forest = TRUE), params1))
   
   ## Get terminal nodes
   terminal.nodeIDs.train <- predict(rf.proximity, training_data, type = "terminalNodes")$predictions
@@ -79,9 +78,7 @@ csrf <- function(formula, training_data, test_data, params1 = list(), params2 = 
     weights <- num.same.node / sum(num.same.node)
     
     ## Grow weighted RF
-    rf.prediction <- do.call(ranger, c(list(formula = formula, data = training_data, 
-                                            write.forest = TRUE, case.weights = weights), 
-                                       params2))
+    rf.prediction <- do.call(grandforest, c(list(formula = formula, data = training_data, write.forest = TRUE, case.weights = weights), params2))
     
     ## Predict outcome
     predict(rf.prediction, test_data[i, ])$predictions

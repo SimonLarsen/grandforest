@@ -22,7 +22,7 @@ parse.formula <- function(formula, data) {
   
   ## Error if illegal column name
   if (!all(make.names(independent_vars[!interaction_idx]) == independent_vars[!interaction_idx])) {
-    stop("Error: Illegal column names in formula interface. Fix column names or use alternative interface in ranger.")
+    stop("Error: Illegal column names in formula interface. Fix column names or use alternative interface in grandforest")
   }
   
   ## Shortcut if no interactions

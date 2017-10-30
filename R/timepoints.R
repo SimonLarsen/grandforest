@@ -29,19 +29,19 @@
 ##' @export
 timepoints <- function(x, ...)  UseMethod("timepoints")
 
-##' Extract unique death times of Ranger Survival prediction object.
+##' Extract unique death times of Grand Forest Survival prediction object.
 ##'
 ##'
-##' @title Ranger timepoints
-##' @param x Ranger Survival prediction object.
+##' @title Grand Forest timepoints
+##' @param x Grand Forest Survival prediction object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Unique death times
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @export
-timepoints.ranger.prediction <- function(x, ...) {
-  if (class(x) != "ranger.prediction") {
-    stop("Object ist no ranger.prediction object.")
+timepoints.grandforest.prediction <- function(x, ...) {
+  if (class(x) != "grandforest.prediction") {
+    stop("Object is not a grandforest.prediction object.")
   }
   if (x$treetype != "Survival") {
     stop("No timepoints found. Object is no Survival prediction object.")
@@ -52,23 +52,23 @@ timepoints.ranger.prediction <- function(x, ...) {
   return(x$unique.death.times)
 }
 
-##' Extract unique death times of Ranger Survival forest
+##' Extract unique death times of Grand Forest Survival forest
 ##'
 ##'
-##' @title Ranger timepoints
-##' @param x Ranger Survival forest object.
+##' @title Grand Forest timepoints
+##' @param x Grand Forest Survival forest object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Unique death times
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @aliases timepoints
 ##' @export
-timepoints.ranger <- function(x, ...) {
-  if (class(x) != "ranger") {
-    stop("Object ist no ranger object.")
+timepoints.grandforest <- function(x, ...) {
+  if (class(x) != "grandforest") {
+    stop("Object is not a grandforest object.")
   }
   if (x$treetype != "Survival") {
-    stop("No timepoints found. Object is no Survival forest.")
+    stop("No timepoints found. Object is not a Survival forest.")
   }
   if (is.null(x$unique.death.times)) {
     stop("No timepoints found.")

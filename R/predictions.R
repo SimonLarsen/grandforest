@@ -29,20 +29,20 @@
 ##' @export
 predictions <- function(x, ...)  UseMethod("predictions")
 
-##' Extract predictions of Ranger prediction object.
+##' Extract predictions of Grand Forest prediction object.
 ##'
 ##'
-##' @title Ranger predictions
-##' @param x Ranger prediction object.
+##' @title Grand Forest predictions
+##' @param x Grand Forest prediction object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Predictions: Classes for Classification forests, Numerical values for Regressions forests and the estimated survival functions for all individuals for Survival forests.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @aliases predictions
 ##' @export
-predictions.ranger.prediction <- function(x, ...) {
-  if (class(x) != "ranger.prediction") {
-    stop("Object ist no ranger.prediction object.")
+predictions.grandforest.prediction <- function(x, ...) {
+  if (class(x) != "grandforest.prediction") {
+    stop("Object is not a grandforest.prediction object.")
   }
   if (x$treetype == "Classification" || x$treetype == "Regression" || x$treetype == "Probability estimation") {
     if (is.null(x$predictions)) {
@@ -61,19 +61,19 @@ predictions.ranger.prediction <- function(x, ...) {
   }
 }
 
-##' Extract training data predictions of Ranger object.
+##' Extract training data predictions of Grand Forest object.
 ##'
 ##'
-##' @title Ranger predictions
-##' @param x Ranger object.
+##' @title Grand Forest predictions
+##' @param x grandforest object.
 ##' @param ... Further arguments passed to or from other methods.
 ##' @return Predictions: Classes for Classification forests, Numerical values for Regressions forests and the estimated survival functions for all individuals for Survival forests.
-##' @seealso \code{\link{ranger}}
+##' @seealso \code{\link{grandforest}}
 ##' @author Marvin N. Wright
 ##' @export
-predictions.ranger<- function(x, ...) {
-  if (class(x) != "ranger") {
-    stop("Object ist no ranger object.")
+predictions.grandforest <- function(x, ...) {
+  if (class(x) != "grandforest") {
+    stop("Object is not a grandforest object.")
   }
   if (x$treetype == "Classification" || x$treetype == "Regression" || x$treetype == "Probability estimation") {
     if (is.null(x$predictions)) {

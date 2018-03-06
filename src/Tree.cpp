@@ -313,7 +313,9 @@ void Tree::findSubgraphBFS(std::set<size_t> &result) {
         size_t p = open.front();
         open.pop();
 
-        for(size_t c : graph->adjacent(p)) {
+        std::vector<size_t> adj(graph->adjacent(p).begin(), graph->adjacent(p).end());
+        std::shuffle(adj.begin(), adj.end(), random_number_generator);
+        for(size_t c : adj) {
             if(marked[c] == false) {
                 open.push(c);
                 marked[c] = true;
@@ -345,7 +347,9 @@ void Tree::findSubgraphDFS(std::set<size_t> &result) {
         size_t p = open.top();
         open.pop();
 
-        for(size_t c : graph->adjacent(p)) {
+        std::vector<size_t> adj(graph->adjacent(p).begin(), graph->adjacent(p).end());
+        std::shuffle(adj.begin(), adj.end(), random_number_generator);
+        for(size_t c : adj) {
             if(marked[c] == false) {
                 open.push(c);
                 marked[c] = true;

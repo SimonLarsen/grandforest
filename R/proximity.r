@@ -23,10 +23,7 @@ proximity.grandforest.prediction <- function(x) {
   
   for(i in seq(2, num.vars)) {
     for(j in seq(1, i-1)) {
-      v <- t(pred[c(i,j),])
-      v <- abs(v[,1] - v[,2])
-      v <- 1 - sapply(v, min, 1)
-      s <- sum(v)
+      s <- sum(pred[i,] == pred[j,])
       prox[i,j] <- prox[i,j] + s
       prox[j,i] <- prox[j,i] + s
     }

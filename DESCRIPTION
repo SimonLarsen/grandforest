@@ -3,7 +3,7 @@ Type: Package
 Title: A graph-guided random forest algorithm
 Version: 0.1
 Date: 2018-04-19
-Author: Simon J. Larsen [aut, cre], Marvin N. Wright [aut], Stefan Wager [ctb], Philipp Probst [ctb]
+Author: Simon J. Larsen [aut, cre], Marvin N. Wright [ctb], Stefan Wager [ctb], Philipp Probst [ctb]
 Maintainer: Simon J. Larsen <simonhffh@gmail.com>
 Description: A fast implementation of Random Forests, particularly suited for high
           dimensional data. Ensembles of classification, regression, survival and

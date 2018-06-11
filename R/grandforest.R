@@ -6,7 +6,7 @@
 # -------------------------------------------------------------------------------
 
 # -------------------------------------------------------------------------------
-#   This file is part of Ranger.
+# This file is part of Ranger.
 #
 # Ranger is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Grand Forest is a graph-guided random forest algorithm based on Ranger.
+##' Grand Forest is a graph-guided random forest algorithm based on Ranger. Grand Forest integrates a feature interaction graph to find highly informative subnetworks.
+##'
 ##' Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 ##' Classification, regression, and survival forests are supported.
 ##' Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).

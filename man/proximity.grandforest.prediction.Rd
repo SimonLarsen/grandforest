@@ -2,15 +2,18 @@
 % Please edit documentation in R/proximity.r
 \name{proximity.grandforest.prediction}
 \alias{proximity.grandforest.prediction}
+\alias{proximity}
 \title{Grand Forest sample proximity}
 \usage{
-\method{proximity}{grandforest.prediction}(x)
+\method{proximity}{grandforest.prediction}(x, ...)
 }
 \arguments{
 \item{x}{grandforest.prediction object.}
+
+\item{...}{Further arguments passed to or from other methods.}
 }
 \value{
-"dist" object
+Numeric matrix with sample similarities.
 }
 \description{
 Extract sample proximities from grandforest.prediction object.

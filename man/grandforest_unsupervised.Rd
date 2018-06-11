@@ -15,6 +15,8 @@ grandforest_unsupervised(data, graph_data = NULL, replace = TRUE,
 \item{replace}{Should background sampling be with replacement?}
 
 \item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index.}
+
+\item{...}{Other arguments to be passed to the \code{grandforest} function during training.}
 }
 \description{
 Helper function for training Grand Forest model for unsupervised analysis.

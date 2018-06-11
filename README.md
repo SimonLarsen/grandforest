@@ -19,22 +19,6 @@ To install the latest development version of the R package run:
 devtools::install_github("SimonLarsen/grandforest")
 ```
 
-### Standalone C++ version
-
-To install the C++ version of Grand Forest in Linux or Mac OS X, you will need a compiler supporting C++11 and CMake. To build start a terminal from the main directory and run the following commands
-
-```bash
-cd cpp_version
-mkdir build
-cd build
-cmake ..
-make
-```
-
-After compilation there should be an executable called "grandforest" in the build directory.
-
-To run the C++ version in Microsoft Windows please cross compile or ask for a binary.
-
 ## Reporting bugs
 
 If you find any bugs, or if you experience any crashes, please report to us. If you have any questions just ask, we won't bite.

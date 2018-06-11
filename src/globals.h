@@ -1,3 +1,10 @@
+/*------------------------------------------------------------------------------
+ This file is part of Grand Forest.
+
+ Grand Forest incorporates work that is part of Ranger.
+ See the original license notice below.
+------------------------------------------------------------------------------*/
+
 /*-------------------------------------------------------------------------------
 This file is part of Ranger.
 

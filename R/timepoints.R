@@ -1,5 +1,12 @@
 # -------------------------------------------------------------------------------
-#   This file is part of Ranger.
+# This file is part of Grand Forest.
+#
+# Grand Forest incorporates work that is part of Ranger.
+# See the original license notice below.
+# -------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
+# This file is part of Ranger.
 #
 # Ranger is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

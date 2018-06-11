@@ -21,7 +21,7 @@ devtools::install_github("SimonLarsen/grandforest")
 
 ## Reporting bugs
 
-If you find any bugs, or if you experience any crashes, please report to us. If you have any questions just ask, we won't bite.
+If you find any bugs, or if you experience any crashes, please report them at <https://github.com/SimonLarsen/grandforest>.
 
 ## Citation
 

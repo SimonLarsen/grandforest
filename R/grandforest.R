@@ -54,64 +54,64 @@
 ##' For details see Malley et al. (2012).
 ##'
 ##' Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
-##' For survival all nodes contain at \code{min.node.size} samples. 
+##' For survival all nodes contain at \code{min.node.size} samples.
 ##' Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
-##' In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
-##' Weights do not need to sum up to 1, they will be normalized later. 
+##' In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected.
+##' Weights do not need to sum up to 1, they will be normalized later.
 ##' The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 ##' Names of the \code{split.select.weights} vector are ignored.
 ##' The usage of \code{split.select.weights} can increase the computation times for large forests.
 ##'
-##' Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
-##' For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
+##' Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}:
+##' For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting.
 ##' For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
 ##' For multiclass classification and survival outcomes, 'order' is experimental and should be used with care.
-##' The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels. 
-##' Note that the factors are only reordered once and not again in each split. 
+##' The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels.
+##' Note that the factors are only reordered once and not again in each split.
 ##'
 ##' For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 ##' Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
-##' Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing. 
-##' 
-##' For GWAS data consider combining \code{grandforest} with the \code{GenABEL} package. 
+##' Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing.
+##'
+##' For GWAS data consider combining \code{grandforest} with the \code{GenABEL} package.
 ##' See the Examples section below for a demonstration using \code{Plink} data.
-##' All SNPs in the \code{GenABEL} object will be used for splitting. 
-##' To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
+##' All SNPs in the \code{GenABEL} object will be used for splitting.
+##' To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula.
 ##' Note that missing values are treated as an extra category while splitting.
-##' 
+##'
 ##' See \url{https://github.com/imbs-hl/ranger} for the development version.
-##' 
-##' With recent R versions, multithreading on Windows platforms should just work. 
+##'
+##' With recent R versions, multithreading on Windows platforms should just work.
 ##' If you compile yourself, the new RTools toolchain is required.
-##' 
-##' @title GrandForest
+##'
+##' @title Grand Forest
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
 ##' @param graph_data Feature interaction graph. Must be two-column character \code{matrix} with feature names corresponding to column names in \code{data}.
 ##' @param num.trees Number of trees.
-##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables. 
+##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables.
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.
 ##' @param subgraph Feature subgraph selection mode. One of 'bfs', 'dfs', 'random'.
 ##' @param write.forest Save \code{grandforest.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
-##' @param probability Grow a probability forest as in Malley et al. (2012). 
+##' @param probability Grow a probability forest as in Malley et al. (2012).
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
-##' @param replace Sample with replacement. 
-##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement. 
+##' @param replace Sample with replacement.
+##' @param sample.fraction Fraction of observations to sample. Default is 1 for sampling with replacement and 0.632 for sampling without replacement.
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
-##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank". 
+##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
-##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.  
+##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.
 ##' @param always.split.variables Character vector with variable names to be always selected in addition to the \code{mtry} variables tried for splitting.
-##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details. 
+##' @param respect.unordered.factors Handling of unordered factor covariates. One of 'ignore', 'order' and 'partition'. For the "extratrees" splitrule the default is "partition" for all other splitrules 'ignore'. Alternatively TRUE (='order') or FALSE (='ignore') can be used. See below for details.
 ##' @param scale.permutation.importance Scale permutation importance by standard error as in (Breiman 2001). Only applicable if permutation variable importance mode selected.
-##' @param keep.inbag Save how often observations are in-bag in each tree. 
+##' @param keep.inbag Save how often observations are in-bag in each tree.
 ##' @param holdout Hold-out mode. Hold-out all samples with case weight 0 and use these for variable importance and prediction error.
 ##' @param num.threads Number of threads. Default is number of CPUs available.
 ##' @param save.memory Use memory saving (but slower) splitting mode. No effect for survival and GWAS data. Warning: This option slows down the tree growing, use only if you encounter memory problems.
 ##' @param verbose Show computation status and estimated runtime.
-##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}. 
+##' @param seed Random seed. Default is \code{NULL}, which generates the seed from \code{R}.
 ##' @param dependent.variable.name Name of dependent variable, needed if no formula given. For survival forests this is the time variable.
 ##' @param status.variable.name Name of status variable, only applicable to survival data and needed if no formula given. Use 1 for event and 0 for censoring.
 ##' @param classification Only needed if data is a matrix. Set to \code{TRUE} to grow a classification forest.
@@ -136,56 +136,38 @@
 ##'   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
 ##' @examples
 ##' require(grandforest)
+##' data(network)
+##' data(categorical)
+##' data(survival)
 ##'
-##' ## Classification forest with default settings
-##' grandforest(Species ~ ., data = iris, graph_data = edges)
+##' ## Training model with categorical response variable
+##' grandforest(data=categorical, graph_data=network, dependent.variable.name="group")
 ##'
-##' ## Prediction
-##' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-##' iris.train <- iris[train.idx, ]
-##' iris.test <- iris[-train.idx, ]
-##' rg.iris <- grandforest(Species ~ ., data = iris.train, graph_data = edges, write.forest = TRUE)
-##' pred.iris <- predict(rg.iris, dat = iris.test)
-##' table(iris.test$Species, pred.iris$predictions)
+##' ## Model survival model
+##' grandforest(data=survival, graph_data=network, dependent.variable.name="time", status.variable.name="event")
 ##'
 ##' ## Variable importance
-##' rg.iris <- grandforest(Species ~ ., data = iris, graph_data = edges, importance = "impurity")
-##' rg.iris$variable.importance
+##' model <- grandforest(data=categorical, graph_data=network, dependent.variable.name="group")
+##' imp <- importance(model)
+##' # Get 5 most important features
+##' top5 <- tail(sort(imp), 5)
 ##'
-##' ## Survival forest
-##' require(survival)
-##' rg.veteran <- grandforest(Surv(time, status) ~ ., data = veteran, graph_data = edges)
-##' plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
-##'
-##' ## Alternative interface
-##' grandforest(dependent.variable.name = "Species", data = iris, graph_data = edges)
-##' 
-##' \dontrun{
-##' ## Use GenABEL interface to read Plink data into R and grow a classification forest
-##' ## The ped and map files are not included
-##' library(GenABEL)
-##' convert.snp.ped("data.ped", "data.map", "data.raw")
-##' dat.gwaa <- load.gwaa.data("data.pheno", "data.raw")
-##' phdata(dat.gwaa)$trait <- factor(phdata(dat.gwaa)$trait)
-##' grandforest(trait ~ ., data = dat.gwaa, graph_data = edges)
-##' }
-##'
-##' @author Marvin N. Wright
+##' @author Simon J. Larsen
 ##' @references
 ##' \itemize{
 ##'   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
-##'   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}. 
+##'   \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}.
 ##'   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med. \url{https://doi.org/10.1002/sim.7212}.
-##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{https://doi.org/10.1023/A:1010933404324}. 
-##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}. 
+##'   \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{https://doi.org/10.1023/A:1010933404324}.
+##'   \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}.
 ##'   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{https://doi.org/10.3414/ME00-01-0052}.
 ##'   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}. 
+##'   \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}.
 ##'   }
 ##' @seealso \code{\link{predict.grandforest}}
 ##' @useDynLib grandforest
 ##' @importFrom Rcpp evalCpp
-##' @import stats 
+##' @import stats
 ##' @import utils
 ##' @importFrom Matrix Matrix
 ##' @export
@@ -193,19 +175,19 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                         num.trees = 500, mtry = NULL,
                         importance = "impurity", subgraph = "bfs",
                         write.forest = TRUE, probability = FALSE,
-                        min.node.size = NULL, replace = TRUE, 
-                        sample.fraction = ifelse(replace, 1, 0.632), 
-                        case.weights = NULL, splitrule = NULL, 
+                        min.node.size = NULL, replace = TRUE,
+                        sample.fraction = ifelse(replace, 1, 0.632),
+                        case.weights = NULL, splitrule = NULL,
                         num.random.splits = 1, alpha = 0.5, minprop = 0.1,
                         split.select.weights = NULL, always.split.variables = NULL,
                         respect.unordered.factors = NULL,
                         scale.permutation.importance = FALSE,
                         keep.inbag = FALSE, holdout = FALSE,
                         num.threads = NULL, save.memory = FALSE,
-                        verbose = TRUE, seed = NULL, 
-                        dependent.variable.name = NULL, status.variable.name = NULL, 
+                        verbose = TRUE, seed = NULL,
+                        dependent.variable.name = NULL, status.variable.name = NULL,
                         classification = NULL) {
-  
+
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- data@gtdata@snpnames
@@ -220,18 +202,18 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     snp.data <- as.matrix(0)
     gwa.mode <- FALSE
   }
-  
+
   ## Sparse matrix data
   if (inherits(data, "Matrix")) {
     if (!("dgCMatrix" %in% class(data))) {
       stop("Error: Currently only sparse data of class 'dgCMatrix' supported.")
     }
-  
+
     if (!is.null(formula)) {
       stop("Error: Sparse matrices only supported with alternative interface. Use dependent.variable.name instead of formula.")
     }
   }
-    
+
   ## Formula interface. Use whole data frame is no formula provided and depvarname given
   if (is.null(formula)) {
     if (is.null(dependent.variable.name)) {
@@ -252,13 +234,13 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     data.selected <- parse.formula(formula, data)
     response <- data.selected[, 1]
   }
-  
+
   ## Check missing values
   if (any(is.na(data.selected))) {
     offending_columns <- colnames(data.selected)[colSums(is.na(data.selected)) > 0]
     stop("Missing data in columns: ", paste0(offending_columns, collapse = ", "), ".", call. = FALSE)
   }
-  
+
   ## Treetype
   if (is.factor(response)) {
     if (probability) {
@@ -279,7 +261,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else {
     stop("Error: Unsupported type of dependent variable.")
   }
-  
+
   ## Dependent and status variable name. For non-survival dummy status variable name.
   if (!is.null(formula)) {
     if (treetype == 5) {
@@ -294,7 +276,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     independent.variable.names <- colnames(data.selected)[colnames(data.selected) != dependent.variable.name &
                                                           colnames(data.selected) != status.variable.name]
   }
-  
+
   ## respect.unordered.factors
   if (is.null(respect.unordered.factors)) {
     if (!is.null(splitrule) && splitrule == "extratrees") {
@@ -310,18 +292,18 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else if (respect.unordered.factors == FALSE) {
     respect.unordered.factors <- "ignore"
   }
-  
+
   ## Recode characters as factors and recode factors if 'order' mode
   if (!is.matrix(data.selected) && !inherits(data.selected, "Matrix")) {
     character.idx <- sapply(data.selected, is.character)
-    
+
     if (respect.unordered.factors == "order") {
       ## Recode characters and unordered factors
       names.selected <- names(data.selected)
       ordered.idx <- sapply(data.selected, is.ordered)
       factor.idx <- sapply(data.selected, is.factor)
-      independent.idx <- names.selected != dependent.variable.name & 
-        names.selected != status.variable.name & 
+      independent.idx <- names.selected != dependent.variable.name &
+        names.selected != status.variable.name &
         names.selected != paste0("Surv(", dependent.variable.name, ", ", status.variable.name, ")")
       recode.idx <- independent.idx & (character.idx | (factor.idx & !ordered.idx))
 
@@ -339,11 +321,11 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
         ## Order factor levels
         means <- aggregate(num.response~x, FUN=mean)
         levels.ordered <- means$x[order(means$num.response)]
-        
+
         ## Return reordered factor
         factor(x, levels = levels.ordered)
       })
-      
+
       ## Save levels
       covariate.levels <- lapply(data.selected[independent.idx], levels)
     } else {
@@ -351,7 +333,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
       data.selected[character.idx] <- lapply(data.selected[character.idx], factor)
     }
   }
-  
+
   ## Input data and variable names, create final data matrix
   if (!is.null(formula) && treetype == 5) {
     data.final <- data.matrix(cbind(response[, 1], response[, 2],
@@ -364,7 +346,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     data.final <- data.matrix(data.selected)
   }
   variable.names <- colnames(data.final)
-  
+
   ## If gwa mode, add snp variable names
   if (gwa.mode) {
     variable.names <- c(variable.names, snp.names)
@@ -372,7 +354,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else {
     all.independent.variable.names <- independent.variable.names
   }
-  
+
   ## Error if no covariates
   if (length(all.independent.variable.names) < 1) {
     stop("Error: No covariates found.")
@@ -384,29 +366,29 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     graph <- apply(graph_data, 2, match, variable.names) - 1
     graph <- graph[!is.na(graph[,1]) & !is.na(graph[,2]),]
   }
-  
+
   ## Number of trees
   if (!is.numeric(num.trees) || num.trees < 1) {
     stop("Error: Invalid value for num.trees.")
   }
-  
+
   ## mtry
   if (is.null(mtry)) {
     mtry <- 0
   } else if (!is.numeric(mtry) || mtry < 0) {
     stop("Error: Invalid value for mtry")
   }
-  
+
   ## Seed
   if (is.null(seed)) {
     seed <- runif(1 , 0, .Machine$integer.max)
   }
-  
+
   ## Keep inbag
   if (!is.logical(keep.inbag)) {
     stop("Error: Invalid value for keep.inbag")
   }
-  
+
   ## Num threads
   ## Default 0 -> detect from system in C++.
   if (is.null(num.threads)) {
@@ -414,19 +396,19 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else if (!is.numeric(num.threads) || num.threads < 0) {
     stop("Error: Invalid value for num.threads")
   }
-  
+
   ## Minumum node size
   if (is.null(min.node.size)) {
     min.node.size <- 0
   } else if (!is.numeric(min.node.size) || min.node.size < 0) {
     stop("Error: Invalid value for min.node.size")
   }
-  
+
   ## Sample fraction
   if (!is.numeric(sample.fraction) || sample.fraction <= 0 || sample.fraction > 1) {
     stop("Error: Invalid value for sample.fraction. Please give a value in (0,1].")
   }
-  
+
   ## Importance mode
   if (is.null(importance) || importance == "none") {
     importance.mode <- 0
@@ -457,7 +439,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else {
     stop("Error: Unknown feature subgraph mode.")
   }
-  
+
   ## Case weights: NULL for no weights
   if (is.null(case.weights)) {
     case.weights <- c(0,0)
@@ -467,17 +449,17 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     }
   } else {
     use.case.weights <- TRUE
-    
+
     ## Sample from non-zero weights in holdout mode
     if (holdout) {
       sample.fraction <- sample.fraction * mean(case.weights > 0)
     }
-    
+
     if (!replace && sum(case.weights > 0) < sample.fraction * nrow(data.final)) {
       stop("Error: Fewer non-zero case weights than observations to sample.")
     }
   }
-  
+
   ## Split select weights: NULL for no weights
   if (is.null(split.select.weights)) {
     split.select.weights <- list(c(0,0))
@@ -496,7 +478,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else {
     stop("Error: Invalid split select weights.")
   }
-  
+
   ## Always split variables: NULL for no variables
   if (is.null(always.split.variables)) {
     always.split.variables <- c("0", "0")
@@ -504,11 +486,11 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else {
     use.always.split.variables <- TRUE
   }
-  
+
   if (use.split.select.weights && use.always.split.variables) {
     stop("Error: Please use only one option of split.select.weights and always.split.variables.")
   }
-  
+
   ## Splitting rule
   if (is.null(splitrule)) {
     if (treetype == 5) {
@@ -560,7 +542,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else {
     stop("Error: Unknown splitrule.")
   }
-  
+
   ## Maxstat splitting
   if (alpha < 0 || alpha > 1) {
     stop("Error: Invalid value for alpha, please give a value between 0 and 1.")
@@ -577,27 +559,27 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     stop("Error: save.memory option not possible in extraTrees mode with unordered predictors.")
   }
 
-  ## Unordered factors  
+  ## Unordered factors
   if (respect.unordered.factors == "partition") {
     names.selected <- names(data.selected)
     ordered.idx <- sapply(data.selected, is.ordered)
     factor.idx <- sapply(data.selected, is.factor)
     independent.idx <- names.selected != dependent.variable.name & names.selected != status.variable.name
     unordered.factor.variables <- names.selected[factor.idx & !ordered.idx & independent.idx]
-    
+
     if (length(unordered.factor.variables) > 0) {
       use.unordered.factor.variables <- TRUE
       ## Check level count
       num.levels <- sapply(data.selected[, factor.idx & !ordered.idx & independent.idx, drop = FALSE], nlevels)
       max.level.count <- .Machine$double.digits
       if (max(num.levels) > max.level.count) {
-        stop(paste("Too many levels in unordered categorical variable ", unordered.factor.variables[which.max(num.levels)], 
+        stop(paste("Too many levels in unordered categorical variable ", unordered.factor.variables[which.max(num.levels)],
                    ". Only ", max.level.count, " levels allowed on this system. Consider using the 'order' option.", sep = ""))
-      } 
+      }
     } else {
       unordered.factor.variables <- c("0", "0")
       use.unordered.factor.variables <- FALSE
-    } 
+    }
   } else if (respect.unordered.factors == "ignore" || respect.unordered.factors == "order") {
     ## Ordering for "order" is handled above
     unordered.factor.variables <- c("0", "0")
@@ -614,8 +596,8 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
       stop("Error: Unordered factor splitting not implemented for 'C' splitting rule.")
     }
   }
-  
-  ## Warning for experimental 'order' splitting 
+
+  ## Warning for experimental 'order' splitting
   if (respect.unordered.factors == "order") {
     if (treetype == 5) {
       warning("Warning: The 'order' mode for unordered factor handling for survival outcomes is experimental.")
@@ -632,10 +614,10 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   prediction.mode <- FALSE
   predict.all <- FALSE
   prediction.type <- 1
-  
+
   ## No loaded forest object
   loaded.forest <- list()
-  
+
   ## Use sparse matrix
   if ("dgCMatrix" %in% class(data.final)) {
     sparse.data <- data.final
@@ -645,7 +627,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     sparse.data <- Matrix(matrix(c(0, 0)))
     use.sparse.data <- FALSE
   }
-  
+
   ## Clean up
   rm("data.selected")
 
@@ -656,15 +638,15 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                            min.node.size, split.select.weights, use.split.select.weights,
                            always.split.variables, use.always.split.variables,
                            status.variable.name, prediction.mode, loaded.forest, snp.data,
-                           replace, probability, unordered.factor.variables, use.unordered.factor.variables, 
-                           save.memory, splitrule.num, case.weights, use.case.weights, predict.all, 
-                           keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type, 
+                           replace, probability, unordered.factor.variables, use.unordered.factor.variables,
+                           save.memory, splitrule.num, case.weights, use.case.weights, predict.all,
+                           keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type,
                            num.random.splits, sparse.data, use.sparse.data)
-  
+
   if (length(result) == 0) {
     stop("User interrupt or internal error.")
   }
-  
+
   ## Prepare results
   if (importance.mode != 0) {
     names(result$variable.importance) <- all.independent.variable.names
@@ -676,12 +658,12 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                                             levels(response))
     true.values <- integer.to.factor(unlist(data.final[, dependent.variable.name]),
                                      levels(response))
-    result$confusion.matrix <- table(true.values, result$predictions, 
+    result$confusion.matrix <- table(true.values, result$predictions,
                                      dnn = c("true", "predicted"), useNA = "ifany")
   } else if (treetype == 5) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
-    } 
+    }
     if (is.vector(result$predictions)) {
       result$predictions <- matrix(result$predictions, nrow = 1)
     }
@@ -691,19 +673,19 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   } else if (treetype == 9 && !is.matrix(data)) {
     if (is.list(result$predictions)) {
       result$predictions <- do.call(rbind, result$predictions)
-    } 
+    }
     if (is.vector(result$predictions)) {
       result$predictions <- matrix(result$predictions, nrow = 1)
     }
-    
+
     ## Set colnames and sort by levels
     colnames(result$predictions) <- unique(response)
     result$predictions <- result$predictions[, levels(droplevels(response)), drop = FALSE]
   }
-  
+
   ## Splitrule
   result$splitrule <- splitrule
-  
+
   ## Set treetype
   if (treetype == 1) {
     result$treetype <- "Classification"
@@ -721,7 +703,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   result$importance.mode <- importance
   result$num.samples <- nrow(data.final)
   result$replace <- replace
-  
+
   ## Write forest object
   if (write.forest) {
     if (is.factor(response)) {
@@ -730,13 +712,13 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     result$forest$independent.variable.names <- independent.variable.names
     result$forest$treetype <- result$treetype
     class(result$forest) <- "grandforest.forest"
-    
+
     ## In 'ordered' mode, save covariate levels
     if (respect.unordered.factors == "order" && !is.matrix(data)) {
       result$forest$covariate.levels <- covariate.levels
     }
   }
-  
+
   class(result) <- "grandforest"
   return(result)
 }

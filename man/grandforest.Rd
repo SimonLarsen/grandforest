@@ -5,10 +5,10 @@
 \title{GrandForest}
 \usage{
 grandforest(formula = NULL, data = NULL, graph_data = NULL,
-  num.trees = 500, mtry = NULL, importance = "none", subgraph = "bfs",
-  write.forest = TRUE, probability = FALSE, min.node.size = NULL,
-  replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632),
-  case.weights = NULL, splitrule = NULL, num.random.splits = 1,
+  num.trees = 500, mtry = NULL, importance = "impurity",
+  subgraph = "bfs", write.forest = TRUE, probability = FALSE,
+  min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
+  1, 0.632), case.weights = NULL, splitrule = NULL, num.random.splits = 1,
   alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
   always.split.variables = NULL, respect.unordered.factors = NULL,
   scale.permutation.importance = FALSE, keep.inbag = FALSE,
@@ -121,88 +121,70 @@ In contrast to other implementations, each tree returns a probability estimate a
 For details see Malley et al. (2012).
 
 Note that for classification and regression nodes with size smaller than \code{min.node.size} can occur, as in original Random Forests.
-For survival all nodes contain at \code{min.node.size} samples. 
+For survival all nodes contain at \code{min.node.size} samples.
 Variables selected with \code{always.split.variables} are tried additionally to the mtry variables randomly selected.
-In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected. 
-Weights do not need to sum up to 1, they will be normalized later. 
+In \code{split.select.weights} variables weighted with 0 are never selected and variables with 1 are always selected.
+Weights do not need to sum up to 1, they will be normalized later.
 The weights are assigned to the variables in the order they appear in the formula or in the data if no formula is used.
 Names of the \code{split.select.weights} vector are ignored.
 The usage of \code{split.select.weights} can increase the computation times for large forests.
 
-Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}: 
-For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting. 
+Unordered factor covariates can be handled in 3 different ways by using \code{respect.unordered.factors}:
+For 'ignore' all factors are regarded ordered, for 'partition' all possible 2-partitions are considered for splitting.
 For 'order' and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4.
 For multiclass classification and survival outcomes, 'order' is experimental and should be used with care.
-The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels. 
+The use of 'order' is recommended for 2-class classification and regression, as it computationally fast and can handle an unlimited number of factor levels.
 Note that the factors are only reordered once and not again in each split.
 
 For a large number of variables and data frames as input data the formula interface can be slow or impossible to use.
 Alternatively \code{dependent.variable.name} (and \code{status.variable.name} for survival) can be used.
 Consider setting \code{save.memory = TRUE} if you encounter memory problems for very large datasets, but be aware that this option slows down the tree growing.
 
-For GWAS data consider combining \code{grandforest} with the \code{GenABEL} package. 
+For GWAS data consider combining \code{grandforest} with the \code{GenABEL} package.
 See the Examples section below for a demonstration using \code{Plink} data.
-All SNPs in the \code{GenABEL} object will be used for splitting. 
-To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula. 
+All SNPs in the \code{GenABEL} object will be used for splitting.
+To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula.
 Note that missing values are treated as an extra category while splitting.
 
 See \url{https://github.com/imbs-hl/ranger} for the development version.
 
-With recent R versions, multithreading on Windows platforms should just work. 
+With recent R versions, multithreading on Windows platforms should just work.
 If you compile yourself, the new RTools toolchain is required.
 }
 \examples{
 require(grandforest)
+data(network)
+data(categorical)
+data(survival)
 
-## Classification forest with default settings
-grandforest(Species ~ ., data = iris, graph_data = edges)
+## Training model with categorical response variable
+grandforest(data=categorical, graph_data=network, dependent.variable.name="group")
 
-## Prediction
-train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-iris.train <- iris[train.idx, ]
-iris.test <- iris[-train.idx, ]
-rg.iris <- grandforest(Species ~ ., data = iris.train, graph_data = edges, write.forest = TRUE)
-pred.iris <- predict(rg.iris, dat = iris.test)
-table(iris.test$Species, pred.iris$predictions)
+## Model survival model
+grandforest(data=survival, graph_data=network, dependent.variable.name="time", status.variable.name="event")
 
 ## Variable importance
-rg.iris <- grandforest(Species ~ ., data = iris, graph_data = edges, importance = "impurity")
-rg.iris$variable.importance
-
-## Survival forest
-require(survival)
-rg.veteran <- grandforest(Surv(time, status) ~ ., data = veteran, graph_data = edges)
-plot(rg.veteran$unique.death.times, rg.veteran$survival[1,])
-
-## Alternative interface
-grandforest(dependent.variable.name = "Species", data = iris, graph_data = edges)
-
-\dontrun{
-## Use GenABEL interface to read Plink data into R and grow a classification forest
-## The ped and map files are not included
-library(GenABEL)
-convert.snp.ped("data.ped", "data.map", "data.raw")
-dat.gwaa <- load.gwaa.data("data.pheno", "data.raw")
-phdata(dat.gwaa)$trait <- factor(phdata(dat.gwaa)$trait)
-grandforest(trait ~ ., data = dat.gwaa, graph_data = edges)
-}
+model <- grandforest(data=categorical, graph_data=network, dependent.variable.name="group")
+imp <- importance(model)
+# Get 5 most important features
+top5 <- tail(sort(imp), 5)
 
 }
 \references{
 \itemize{
   \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of Random Forests for High Dimensional Data in C++ and R. J Stat Softw 77:1-17. \url{https://doi.org/10.18637/jss.v077.i01}.
-  \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}. 
+  \item Schmid, M., Wright, M. N. & Ziegler, A. (2016). On the use of Harrell's C for clinical risk prediction via random survival forests. Expert Syst Appl 63:450-459. \url{https://doi.org/10.1016/j.eswa.2016.07.018}.
   \item Wright, M. N., Dankowski, T. & Ziegler, A. (2017). Unbiased split variable selection for random survival forests using maximally selected rank statistics. Stat Med. \url{https://doi.org/10.1002/sim.7212}.
-  \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{https://doi.org/10.1023/A:1010933404324}. 
-  \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}. 
+  \item Breiman, L. (2001). Random forests. Mach Learn, 45(1), 5-32. \url{https://doi.org/10.1023/A:1010933404324}.
+  \item Ishwaran, H., Kogalur, U. B., Blackstone, E. H., & Lauer, M. S. (2008). Random survival forests. Ann Appl Stat 2:841-860. \url{https://doi.org/10.1097/JTO.0b013e318233d835}.
   \item Malley, J. D., Kruppa, J., Dasgupta, A., Malley, K. G., & Ziegler, A. (2012). Probability machines: consistent probability estimation using nonparametric learning machines. Methods Inf Med 51:74-81. \url{https://doi.org/10.3414/ME00-01-0052}.
   \item Hastie, T., Tibshirani, R., Friedman, J. (2009). The Elements of Statistical Learning. Springer, New York. 2nd edition.
-  \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}. 
+  \item Geurts, P., Ernst, D., Wehenkel, L. (2006). Extremely randomized trees. Mach Learn 63:3-42. \url{https://doi.org/10.1007/s10994-006-6226-1}.
   }
 }
 \seealso{
 \code{\link{predict.grandforest}}
 }
 \author{
-Marvin N. Wright
+Simon J. Larsen
 }

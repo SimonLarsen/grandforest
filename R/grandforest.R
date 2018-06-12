@@ -191,7 +191,7 @@
 ##' @export
 grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                         num.trees = 500, mtry = NULL,
-                        importance = "none", subgraph = "bfs",
+                        importance = "impurity", subgraph = "bfs",
                         write.forest = TRUE, probability = FALSE,
                         min.node.size = NULL, replace = TRUE, 
                         sample.fraction = ifelse(replace, 1, 0.632), 

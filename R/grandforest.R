@@ -33,7 +33,8 @@
 # http://www.imbs-luebeck.de
 # -------------------------------------------------------------------------------
 
-##' Grand Forest is a graph-guided random forest algorithm based on Ranger. Grand Forest integrates a feature interaction graph to find highly informative subnetworks.
+##' Grand Forest is a graph-guided Random Forest algorithm based on Ranger.
+##' Grand Forest integrates a feature interaction graph in order to guide the feature selection towards interacting features.
 ##'
 ##' Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 ##' Classification, regression, and survival forests are supported.

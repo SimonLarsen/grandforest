@@ -5,9 +5,7 @@ A graph-guided Random Forest algorithm
 
 ## Introduction
 
-Grand Forest is a graph-guided Random Forest algorithm, integrating secondary graph-structured data in order guide the feature selection towards interacting features. Grand Forest is based on [ranger](https://github.com/imbs-hl/ranger).
-
-ranger is a fast implementation of random forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data. Classification, regression, probability estimation and survival forests are supported. Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008). For probability estimation forests see Malley et al. (2012).
+Grand Forest is a graph-guided Random Forest algorithm, integrating secondary graph-structured data in order guide the feature selection towards interacting features. While it can be used for prediction, the main purpose of Grand Forest is descriptive, as it provides an efficient way of discovering highly informative subnetworks. Grand Forest is based on [ranger](https://github.com/imbs-hl/ranger).
 
 ## Installation
 

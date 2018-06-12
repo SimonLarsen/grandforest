@@ -5,11 +5,11 @@ Version: 0.1
 Date: 2018-04-19
 Author: Simon J. Larsen [aut, cre], Marvin N. Wright [ctb], Stefan Wager [ctb], Philipp Probst [ctb]
 Maintainer: Simon J. Larsen <simonhffh@gmail.com>
-Description: A fast implementation of Random Forests, particularly suited for high
-          dimensional data. Ensembles of classification, regression, survival and
-          probability prediction trees are supported. Data from genome-wide association
-          studies can be analyzed efficiently. In addition to data frames, datasets of
-          class 'gwaa.data' (R package 'GenABEL') can be directly analyzed.
+Description: Grand Forest is a graph-guided Random Forest algorithm, integrating secondary
+    graph-structured data in order guide the feature selection towards interacting features.
+    While it can be used for prediction, the main purpose of Grand Forest is descriptive,
+    as it provides an efficient way of discovering highly informative subnetworks.
+    Grand Forest is based on ranger.
 License: GPL-3
 Imports: Rcpp (>= 0.11.2), Matrix
 LinkingTo: Rcpp, RcppEigen

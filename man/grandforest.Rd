@@ -99,12 +99,14 @@ Object of class \code{grandforest} with elements
   \item{\code{inbag.counts}}{Number of times the observations are in-bag in the trees.}
 }
 \description{
-Grand Forest is a graph-guided random forest algorithm based on Ranger.
+Grand Forest is a graph-guided Random Forest algorithm based on Ranger.
+Grand Forest integrates a feature interaction graph in order to guide the feature selection towards interacting features.
+}
+\details{
 Ranger is a fast implementation of Random Forest (Breiman 2001) or recursive partitioning, particularly suited for high dimensional data.
 Classification, regression, and survival forests are supported.
 Classification and regression forests are implemented as in the original Random Forest (Breiman 2001), survival forests as in Random Survival Forests (Ishwaran et al. 2008).
-}
-\details{
+
 The tree type is determined by the type of the dependent variable.
 For factors classification trees are grown, for numeric values regression trees and for survival objects survival trees.
 The Gini index is used as default splitting rule for classification.

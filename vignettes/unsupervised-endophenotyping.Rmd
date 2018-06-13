@@ -1,5 +1,5 @@
 ---
-title: "Supervised gene module discovery with Grand Forest"
+title: "Unsupervised endophenotyping with Grand Forest"
 author: "Simon J. Larsen"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette demonstrates how to use Grand Forest to find a gene module associated with survival in non-small cell lung cancer.
+This vignette demonstrates how to perform an unsupervised analysis with Grand Forest to search for *de novo* endophenotypes and gene modules in non-small cell lung cancer.
 
 ## Network preparation
 
@@ -50,35 +50,35 @@ The resulting data frame should contain two columns with gene identifiers as `ch
 
 Next we download a gene expression data set from non-small cell lung cancer patients.
 The dataset was extracted from [GSE30219](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE30219).
-Besides gene expression values, we also obtain survival information for each patient. The `os_time`-column contains the follow-up time for each patient in months, and the `os_event` indicates whether an event has happened (0 = no event, 1 = death). Each remaining column corresponds to a gene.
+The first two columns contain survival information for each patient. Since we will be doing unsupervised analysis, we will simply remove these columns.
+The resulting data frame contains a column for each gene with gene expression values for each patient.
 
 ```{r}
 # Download lung cancer expression data set with survival times.
 D <- read_csv("https://grandforest.compbio.sdu.dk/files/survival_example.csv.gz")
+
+# remove survival information and keep for latter
+survival <- D[,1:2]
+D <- D[,-(1:2)]
 
 print(D[1:8,1:8])
 ```
 
 ## Training the Grand Forest model
 
-A Grand Forest model is trained on the expression data using the `grandforest` function.
-We supply the expression data and network with the `data` and `graph_data` arguments. We also indicate which columns are reponse variables by setting the `dependent.variable.name` and `status.variable.name` arguments.
+We can train an unsupervised model using the `grandforest_unsupervised` helper function. The function will generate a background distribution from the input data and train a Grand Forest model to recognize the foreground from the background.
 
 ```{r}
 library(grandforest)
 
-model <- grandforest(
+model <- grandforest_unsupervised(
   data = D,
   graph_data = edges,
-  dependent.variable.name = "os_time",
-  status.variable.name = "os_event",
-  num.trees=500 # 10000 trees recommended for real analysis
+  num.trees = 1000
 )
-
-print(model)
 ```
 
-In this example we only train 500 decision trees but in a real analysis we recommend using at least 10000 trees for optimal results.
+In this example we only train 1000 decision trees but in a real analysis we recommend using at least 10000 trees for optimal results.
 
 Once we have trained a model we can obtain gene importance estimates using the `importance`-method. We can use this to obtain a table of the 25 most important genes:
 
@@ -98,7 +98,7 @@ print(top25)
 ```{r, fig.width=6, fig.height=4}
 ggplot(top25, aes(reorder(label, -value), value)) +
   geom_bar(stat="identity") +
-  theme(axis.text.x=element_text(angle=45, hjust=1)) +
+  theme_classic() + theme(axis.text.x=element_text(angle=45, hjust=1)) +
   labs(x="gene", y="importance")
 ```
 
@@ -120,6 +120,39 @@ ggplot(net.df, aes(from_id=from_id, to_id=to_id)) +
     labelon = TRUE, labelcolour="black", vjust = 0.5, fontsize=3
   ) +
   theme_net()
+```
+
+## Clustering patients
+
+We can stratify the patients into new endophenotypes by clustering them using the genes in the gene module we obtained with Grand Forest.
+
+We first extract the 25 most important genes and scale/center the expression values. Then we cluster the patients into two groups using k-means clustering.
+
+```{r}
+# Extract module features and scale/center values.
+D.scaled <- scale(D[,top25$gene], center=TRUE, scale=TRUE)
+colnames(D.scaled) <- top25$label
+
+# Cluster into two groups using k-means
+cl <- kmeans(D.scaled, centers=2, nstart=20)
+print(cl$cluster)
+```
+
+We can visualize the clustering as a heatmap to check which genes appear to be up- and downregulated in each group.
+
+```{r, fig.width=6, fig.height=5}
+library(ComplexHeatmap)
+Heatmap(D.scaled, split = cl$cluster, name = "expression")
+```
+
+We can also use the survival information we removed earlier to compare the survival curves for the two endophenotypes we identified.
+Here we observe that the stratification we identified is highly significantly associated to overall survival.
+
+```{r, fig.width=5, fig.height=4}
+library(survival)
+library(survminer)
+cl.survival <- data.frame(survival, cluster=cl$cluster)
+ggsurvplot(survfit(Surv(os_time, os_event)~cluster, data=cl.survival), pval=TRUE)$plot
 ```
 
 ## Session info

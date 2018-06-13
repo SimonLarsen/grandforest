@@ -156,7 +156,10 @@ data(survival)
 grandforest(data=categorical, graph_data=network, dependent.variable.name="group")
 
 ## Model survival model
-grandforest(data=survival, graph_data=network, dependent.variable.name="time", status.variable.name="event")
+grandforest(
+  data=survival, graph_data=network,
+  dependent.variable.name="time", status.variable.name="event"
+)
 
 ## Variable importance
 model <- grandforest(data=categorical, graph_data=network, dependent.variable.name="group")

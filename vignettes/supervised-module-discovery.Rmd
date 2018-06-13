@@ -1,0 +1,128 @@
+---
+title: "Supervised gene module discovery with Grand Forest"
+author: "Simon J. Larsen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+This vignette demonstrates how to use Grand Forest to find a gene module associated with survival in non-small cell lung cancer.
+
+## Network preparation
+
+First we need to prepare the gene-gene interaction network. We can obtain a protein-protein interaction network from BioGRID using the [simpIntLists](https://bioconductor.org/packages/release/data/experiment/html/simpIntLists.html) package from Bioconductor.
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(simpIntLists)
+
+data("HumanBioGRIDInteractionEntrezId")
+
+# convert edge lists into two-column data frame
+edges <- lapply(HumanBioGRIDInteractionEntrezId, function(x) {
+  data.frame(
+    source = as.character(x$name),
+    target = as.character(x$interactors),
+    stringsAsFactors = FALSE
+  )
+})
+edges <- rbindlist(edges)
+
+head(edges)
+```
+
+The resulting data frame should contain two columns with gene identifiers as `character` strings. In this example we will be using Entrez Gene IDs, but any other identifier can be used, provided the same type is used in the experimental data as well.
+
+## Expression data preparation
+
+Next we download a gene expression data set from non-small cell lung cancer patients.
+Besides gene expression values, we also obtain survival information for each patient. The `os_time`-column contains the follow-up time for each patient in months, and the `os_event` indicates whether an event has happened (0 = no event, 1 = death). Each remaining column corresponds to a gene.
+
+```{r}
+# Download lung cancer expression data set with survival times.
+D <- read_csv("https://grandforest.compbio.sdu.dk/files/survival_example.csv.gz")
+
+print(D[1:8,1:8])
+```
+
+## Training the Grand Forest model
+
+A Grand Forest model is trained on the expression data using the `grandforest` function.
+We supply the expression data and network with the `data` and `graph_data` arguments. We also indicate which columns are reponse variables by setting the `dependent.variable.name` and `status.variable.name` arguments.
+
+```{r}
+library(grandforest)
+
+model <- grandforest(
+  data = D,
+  graph_data = edges,
+  dependent.variable.name = "os_time",
+  status.variable.name = "os_event",
+  num.trees=500 # 10000 trees recommended for real analysis
+)
+
+print(model)
+```
+
+In this example we only train 500 decision trees but in a real analysis we recommend using at least 10000 trees for optimal results.
+
+Once we have trained a model we can obtain gene importance estimates using the `importance`-method. We can use this to obtain a table of the 25 most important genes:
+
+```{r}
+library(org.Hs.eg.db) # for mapping Entrez IDs to gene names
+
+top25 <- importance(model) %>%
+  sort(decreasing=TRUE) %>%
+  head(25) %>%
+  as_data_frame %>%
+  rownames_to_column(var="gene") %>%
+  mutate(label=mapIds(org.Hs.eg.db, gene, "SYMBOL", "ENTREZID"))
+
+print(top25)
+```
+
+```{r, fig.width=6, fig.height=4}
+ggplot(top25, aes(reorder(label, -value), value)) +
+  geom_bar(stat="identity") +
+  theme(axis.text.x=element_text(angle=45, hjust=1)) +
+  labs(x="gene", y="importance")
+```
+
+## Extract and visualize gene module
+
+We can also visualize the gene module as a network. Here we extract the subnetwork induced by the 25 genes and visualize the network using [geomnet](https://cran.r-project.org/web/packages/geomnet/index.html).
+
+```{r, fig.width=6, fig.height=6}
+library(geomnet)
+
+subnetwork <- filter(edges, source %in% top25$gene & target %in% top25$gene)
+
+net.df <- fortify(as.edgedf(subnetwork), top25)
+
+ggplot(net.df, aes(from_id=from_id, to_id=to_id)) +
+  geom_net(aes(colour=importance, label=label),
+    layout.alg = "circle", directed=FALSE,
+    colour = "lightblue", size = 15,
+    labelon = TRUE, labelcolour="black", vjust = 0.5, fontsize=3
+  ) +
+  theme_net()
+```
+
+## Session info
+
+```{r echo=FALSE}
+sessionInfo()
+```

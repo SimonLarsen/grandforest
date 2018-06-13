@@ -2,7 +2,7 @@
 % Please edit documentation in R/grandforest.R
 \name{grandforest}
 \alias{grandforest}
-\title{GrandForest}
+\title{Grand Forest}
 \usage{
 grandforest(formula = NULL, data = NULL, graph_data = NULL,
   num.trees = 500, mtry = NULL, importance = "impurity",
@@ -145,11 +145,6 @@ See the Examples section below for a demonstration using \code{Plink} data.
 All SNPs in the \code{GenABEL} object will be used for splitting.
 To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula.
 Note that missing values are treated as an extra category while splitting.
-
-See \url{https://github.com/imbs-hl/ranger} for the development version.
-
-With recent R versions, multithreading on Windows platforms should just work.
-If you compile yourself, the new RTools toolchain is required.
 }
 \examples{
 require(grandforest)

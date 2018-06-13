@@ -79,11 +79,6 @@
 ##' To use only the SNPs without sex or other covariates from the phenotype file, use \code{0} on the right hand side of the formula.
 ##' Note that missing values are treated as an extra category while splitting.
 ##'
-##' See \url{https://github.com/imbs-hl/ranger} for the development version.
-##'
-##' With recent R versions, multithreading on Windows platforms should just work.
-##' If you compile yourself, the new RTools toolchain is required.
-##'
 ##' @title Grand Forest
 ##' @param formula Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.
 ##' @param data Training data of class \code{data.frame}, \code{matrix} or \code{gwaa.data} (GenABEL).
@@ -144,7 +139,10 @@
 ##' grandforest(data=categorical, graph_data=network, dependent.variable.name="group")
 ##'
 ##' ## Model survival model
-##' grandforest(data=survival, graph_data=network, dependent.variable.name="time", status.variable.name="event")
+##' grandforest(
+##'   data=survival, graph_data=network,
+##'   dependent.variable.name="time", status.variable.name="event"
+##' )
 ##'
 ##' ## Variable importance
 ##' model <- grandforest(data=categorical, graph_data=network, dependent.variable.name="group")

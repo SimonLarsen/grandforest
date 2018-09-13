@@ -56,7 +56,7 @@ Forest::Forest() :
     memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), predict_all(false), keep_inbag(false), sample_fraction(1),
     holdout(false), prediction_type(DEFAULT_PREDICTIONTYPE), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), alpha(DEFAULT_ALPHA),
     minprop(DEFAULT_MINPROP), num_threads(DEFAULT_NUM_THREADS), data(0), graph(0), overall_prediction_error(0),
-    importance_mode(DEFAULT_IMPORTANCE_MODE), subgraph_mode(DEFAULT_SUBGRAPH_MODE), progress(0)
+    importance_mode(DEFAULT_IMPORTANCE_MODE), subgraph_mode(DEFAULT_SUBGRAPH_MODE), progress(0), random_root(false)
 { }
 
 Forest::~Forest() {
@@ -76,7 +76,7 @@ void Forest::initCpp(
         std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting,
         SplitRule splitrule, std::string case_weights_file, bool predict_all,
         double sample_fraction, double alpha, double minprop, bool holdout, PredictionType prediction_type,
-        uint num_random_splits
+        uint num_random_splits, bool random_root
 ) {
   this->verbose_out = verbose_out;
 
@@ -118,7 +118,7 @@ void Forest::initCpp(
   init(dependent_variable_name, memory_mode, data, graph, mtry, output_prefix, num_trees, seed, num_threads,
        importance_mode, subgraph_mode, min_node_size, status_variable_name, prediction_mode, sample_with_replacement,
        unordered_variable_names, memory_saving_splitting, splitrule, predict_all, sample_fraction, alpha,
-       minprop, holdout, prediction_type, num_random_splits);
+       minprop, holdout, prediction_type, num_random_splits, random_root);
 
   if (prediction_mode) {
     loadFromFile(load_forest_filename);
@@ -177,7 +177,7 @@ void Forest::initR(
         bool prediction_mode, bool sample_with_replacement, std::vector<std::string>& unordered_variable_names,
         bool memory_saving_splitting, SplitRule splitrule, std::vector<double>& case_weights, bool predict_all,
         bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout,
-        PredictionType prediction_type, uint num_random_splits
+        PredictionType prediction_type, uint num_random_splits, bool random_root
 ) {
   this->verbose_out = verbose_out;
 
@@ -185,7 +185,7 @@ void Forest::initR(
   init(dependent_variable_name, MEM_DOUBLE, input_data, graph_data, mtry, "", num_trees, seed, num_threads,
        importance_mode, subgraph_mode, min_node_size, status_variable_name, prediction_mode, sample_with_replacement,
        unordered_variable_names, memory_saving_splitting, splitrule, predict_all, sample_fraction, alpha, minprop,
-       holdout, prediction_type, num_random_splits);
+       holdout, prediction_type, num_random_splits, random_root);
 
   // Set variables to be always considered for splitting
   if (!always_split_variable_names.empty()) {
@@ -216,7 +216,7 @@ void Forest::init(
         std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
         std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting,
         SplitRule splitrule, bool predict_all, double sample_fraction, double alpha, double minprop,
-        bool holdout, PredictionType prediction_type, uint num_random_splits
+        bool holdout, PredictionType prediction_type, uint num_random_splits, bool random_root
 ) {
   // Initialize data with memmode
   this->data = input_data;
@@ -261,6 +261,7 @@ void Forest::init(
   this->minprop = minprop;
   this->prediction_type = prediction_type;
   this->num_random_splits = num_random_splits;
+  this->random_root = random_root;
 
   // Set number of samples and variables
   num_samples = data->getNumRows();
@@ -452,7 +453,7 @@ void Forest::grow() {
     trees[i]->init(data, graph, mtry, dependent_varID, num_samples, tree_seed, &deterministic_varIDs,
                    &split_select_varIDs, tree_split_select_weights, importance_mode, subgraph_mode, min_node_size,
                    sample_with_replacement, memory_saving_splitting, splitrule, &case_weights, keep_inbag,
-                   sample_fraction, alpha, minprop, holdout, num_random_splits);
+                   sample_fraction, alpha, minprop, holdout, num_random_splits, random_root);
   }
 
   // Init variable importance

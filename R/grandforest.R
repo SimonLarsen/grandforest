@@ -95,6 +95,7 @@
 ##' @param case.weights Weights for sampling of training observations. Observations with larger weights will be selected with higher probability in the bootstrap (or subsampled) samples for the trees.
 ##' @param splitrule Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".
 ##' @param num.random.splits For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.
+##' @param random.root Choose root in decision trees randomly from subnetworks.
 ##' @param alpha For "maxstat" splitrule: Significance threshold to allow splitting.
 ##' @param minprop For "maxstat" splitrule: Lower quantile of covariate distribution to be considered for splitting.
 ##' @param split.select.weights Numeric vector with weights between 0 and 1, representing the probability to select variables for splitting. Alternatively, a list of size num.trees, containing split select weight vectors for each tree can be used.
@@ -176,7 +177,8 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                         min.node.size = NULL, replace = TRUE,
                         sample.fraction = ifelse(replace, 1, 0.632),
                         case.weights = NULL, splitrule = NULL,
-                        num.random.splits = 1, alpha = 0.5, minprop = 0.1,
+                        num.random.splits = 1, random.root = FALSE,
+                        alpha = 0.5, minprop = 0.1,
                         split.select.weights = NULL, always.split.variables = NULL,
                         respect.unordered.factors = NULL,
                         scale.permutation.importance = FALSE,
@@ -641,7 +643,7 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                            replace, probability, unordered.factor.variables, use.unordered.factor.variables,
                            save.memory, splitrule.num, case.weights, use.case.weights, predict.all,
                            keep.inbag, sample.fraction, alpha, minprop, holdout, prediction.type,
-                           num.random.splits, sparse.data, use.sparse.data)
+                           num.random.splits, random.root, sparse.data, use.sparse.data)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

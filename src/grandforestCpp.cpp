@@ -62,7 +62,7 @@ Rcpp::List grandforestCpp(
         bool use_unordered_variable_names, bool save_memory, uint splitrule_r,
         std::vector<double>& case_weights, bool use_case_weights, bool predict_all,
         bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint prediction_type_r,
-        uint num_random_splits, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data
+        uint num_random_splits, bool random_root, Eigen::SparseMatrix<double> sparse_data, bool use_sparse_data
 ) {
   Rcpp::List result;
   Forest* forest = 0;
@@ -150,7 +150,7 @@ Rcpp::List grandforestCpp(
                   importance_mode, subgraph_mode, min_node_size, split_select_weights, always_split_variable_names,
                   status_variable_name, prediction_mode, sample_with_replacement, unordered_variable_names,
                   save_memory, splitrule, case_weights, predict_all, keep_inbag, sample_fraction, alpha, minprop,
-                  holdout, prediction_type, num_random_splits);
+                  holdout, prediction_type, num_random_splits, random_root);
 
     // Load forest object if in prediction mode
     if (prediction_mode) {

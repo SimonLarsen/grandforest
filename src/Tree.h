@@ -60,7 +60,7 @@ public:
       std::vector<double>* split_select_weights, ImportanceMode importance_mode, SubgraphMode subgraph_mode,
       uint min_node_size, bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule,
       std::vector<double>* case_weights, bool keep_inbag, double sample_fraction, double alpha, double minprop,
-      bool holdout, uint num_random_splits);
+      bool holdout, uint num_random_splits, bool random_root);
 
   virtual void initInternal() = 0;
 
@@ -200,6 +200,7 @@ protected:
   double alpha;
   double minprop;
   uint num_random_splits;
+  bool random_root;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(Tree);

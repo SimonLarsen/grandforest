@@ -135,4 +135,7 @@ const double STATUS_INTERVAL = 30.0;
 // Threshold for q value split method switch
 const double Q_THRESHOLD = 0.02;
 
+// Whether to choose root in decision trees randomly
+const bool DEFAULT_RANDOM_ROOT = false;
+
 #endif /* GLOBALS_H_ */

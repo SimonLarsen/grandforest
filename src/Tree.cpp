@@ -45,7 +45,7 @@ Tree::Tree() :
     split_select_varIDs(0), split_select_weights(0), case_weights(0), oob_sampleIDs(0), holdout(false), keep_inbag(false),
     data(0), graph(0), variable_importance(0), importance_mode(DEFAULT_IMPORTANCE_MODE), subgraph_mode(DEFAULT_SUBGRAPH_MODE),
     sample_with_replacement(true), sample_fraction(1), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE),
-    alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS)
+    alpha(DEFAULT_ALPHA), minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), random_root(false)
 { }
 
 Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>& split_varIDs, std::vector<double>& split_values) :
@@ -54,7 +54,7 @@ Tree::Tree(std::vector<std::vector<size_t>>& child_nodeIDs, std::vector<size_t>&
     child_nodeIDs(child_nodeIDs), oob_sampleIDs(0), holdout(false), keep_inbag(false), data(0), graph(0), variable_importance(0),
     importance_mode(DEFAULT_IMPORTANCE_MODE), subgraph_mode(DEFAULT_SUBGRAPH_MODE), sample_with_replacement(true),
     sample_fraction(1), memory_saving_splitting(false), splitrule(DEFAULT_SPLITRULE), alpha(DEFAULT_ALPHA),
-    minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS)
+    minprop(DEFAULT_MINPROP), num_random_splits(DEFAULT_NUM_RANDOM_SPLITS), random_root(DEFAULT_RANDOM_ROOT)
 { }
 
 Tree::~Tree() {
@@ -64,7 +64,7 @@ void Tree::init(Data* data, Graph* graph, uint mtry, size_t dependent_varID, siz
     std::vector<size_t>* deterministic_varIDs, std::vector<size_t>* split_select_varIDs,
     std::vector<double>* split_select_weights, ImportanceMode importance_mode, SubgraphMode subgraph_mode, uint min_node_size,
     bool sample_with_replacement, bool memory_saving_splitting, SplitRule splitrule, std::vector<double>* case_weights,
-    bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits) {
+    bool keep_inbag, double sample_fraction, double alpha, double minprop, bool holdout, uint num_random_splits, bool random_root) {
 
   this->data = data;
   this->graph = graph;
@@ -96,6 +96,7 @@ void Tree::init(Data* data, Graph* graph, uint mtry, size_t dependent_varID, siz
   this->alpha = alpha;
   this->minprop = minprop;
   this->num_random_splits = num_random_splits;
+  this->random_root = random_root;
 
   initInternal();
 }
@@ -267,15 +268,21 @@ void Tree::createPossibleSplitVarSubset(std::vector<size_t>& result) {
   } else {
     // No corrected Gini importance supported for weighted splitting
     size_t num_draws = mtry - result.size();
-    drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, num_draws,
-        *split_select_weights);
+    drawWithoutReplacementWeighted(result, random_number_generator, *split_select_varIDs, num_draws, *split_select_weights);
   }
 }
 
 void Tree::createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> &result) {
     // root node
     if(nodeID == 0) {
-        std::copy(subgraph.begin(), subgraph.end(), std::back_inserter(result));
+        if(random_root) {
+          std::vector<size_t> tmp(subgraph.begin(), subgraph.end());
+          std::uniform_int_distribution<size_t> dist(0, tmp.size()-1);
+          size_t index = dist(random_number_generator);
+          result.push_back(tmp[index]);
+        } else {
+          std::copy(subgraph.begin(), subgraph.end(), std::back_inserter(result));
+        }
     } else {
         size_t parentID = parent_nodeIDs[nodeID];
         size_t parent_varID = split_varIDs[parentID];

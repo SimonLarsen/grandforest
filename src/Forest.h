@@ -65,20 +65,20 @@ public:
                std::string status_variable_name, bool sample_with_replacement,
                std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
                std::string case_weights_file, bool predict_all, double sample_fraction, double alpha, double minprop,
-               bool holdout, PredictionType prediction_type, uint num_random_splits);
+               bool holdout, PredictionType prediction_type, uint num_random_splits, bool random_root);
   void initR(std::string dependent_variable_name, Data* input_data, Graph* graph, uint mtry, uint num_trees,
              std::ostream* verbose_out, uint seed, uint num_threads, ImportanceMode importance_mode, SubgraphMode subgraph_mode,
              uint min_node_size, std::vector<std::vector<double>>& split_select_weights, std::vector<std::string>& always_split_variable_names,
              std::string status_variable_name, bool prediction_mode, bool sample_with_replacement,
              std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting, SplitRule splitrule,
              std::vector<double>& case_weights, bool predict_all, bool keep_inbag, double sample_fraction, double alpha,
-             double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits);
+             double minprop, bool holdout, PredictionType prediction_type, uint num_random_splits, bool random_root);
   void init(std::string dependent_variable_name, MemoryMode memory_mode, Data* input_data, Graph* graph, uint mtry,
             std::string output_prefix, uint num_trees, uint seed, uint num_threads, ImportanceMode importance_mode,
             SubgraphMode subgraph_mode, uint min_node_size, std::string status_variable_name, bool prediction_mode,
             bool sample_with_replacement, std::vector<std::string>& unordered_variable_names, bool memory_saving_splitting,
             SplitRule splitrule, bool predict_all, double sample_fraction, double alpha, double minprop, bool holdout,
-            PredictionType prediction_type, uint num_random_splits);
+            PredictionType prediction_type, uint num_random_splits, bool random_root);
 
   virtual void initInternal(std::string status_variable_name) = 0;
 
@@ -209,6 +209,7 @@ protected:
   bool holdout;
   PredictionType prediction_type;
   uint num_random_splits;
+  bool random_root;
 
   // MAXSTAT splitrule
   double alpha;

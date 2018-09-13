@@ -86,7 +86,7 @@
 ##' @param num.trees Number of trees.
 ##' @param mtry Number of variables to possibly split at in each node. Default is the (rounded down) square root of the number variables.
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.
-##' @param subgraph Feature subgraph selection mode. One of 'bfs', 'dfs', 'random'.
+##' @param subgraph Feature subgraph selection mode. One of 'bfs', 'dfs', 'random', 'random.adjusted'.
 ##' @param write.forest Save \code{grandforest.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.
 ##' @param probability Grow a probability forest as in Malley et al. (2012).
 ##' @param min.node.size Minimal node size. Default 1 for classification, 5 for regression, 3 for survival, and 10 for probability.
@@ -434,6 +434,8 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
     subgraph.mode <- 2
   } else if(subgraph == "random") {
     subgraph.mode <- 3
+  } else if(subgraph == "random.adjusted") {
+    subgraph.mode <- 4
   } else {
     stop("Error: Unknown feature subgraph mode.")
   }

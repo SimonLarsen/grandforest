@@ -293,8 +293,10 @@ void Tree::createFeatureSubgraph(std::set<size_t> &result) {
         findSubgraphBFS(result);
     } else if(subgraph_mode == SUBGRAPH_DFS) {
         findSubgraphDFS(result);
-    } else {
+    } else if(subgraph_mode == SUBGRAPH_RANDOM) {
         findSubgraphRandom(result);
+    } else {
+        findSubgraphRandomAdjusted(result);
     }
 }
 
@@ -387,6 +389,45 @@ void Tree::findSubgraphRandom(std::set<size_t> &result) {
     while(!open.empty() && result.size() < mtry) {
         std::uniform_int_distribution<size_t> open_dist(0, open.size()-1);
         size_t pi = open_dist(random_number_generator);
+
+        size_t p = open[pi];
+        open.erase(open.begin() + pi);
+
+        for(size_t c : graph->adjacent(p)) {
+            if(marked[c] == false) {
+                open.push_back(c);
+                marked[c] = true;
+            }
+        }
+        result.insert(p);
+    }
+}
+
+void Tree::findSubgraphRandomAdjusted(std::set<size_t> &result) {
+    std::vector<size_t> open;
+    std::vector<bool> marked(graph->vertexCount(), false);
+
+    // Mark no split variables to avoid selection
+    for(size_t i : data->getNoSplitVariables()) {
+        marked[i] = true;
+    }
+
+    std::uniform_int_distribution<size_t> start_dist(0, graph->vertexCount()-1);
+    size_t start_node;
+    do {
+        start_node = start_dist(random_number_generator);
+    } while(marked[start_node] == true);
+
+    marked[start_node] = true;
+    open.push_back(start_node);
+
+    while(!open.empty() && result.size() < mtry) {
+        std::vector<double> probs;
+        for(size_t node : open) {
+           probs.push_back(1.0 / graph->degree(node));
+        }
+        
+        size_t pi = rouletteSelection(probs, random_number_generator);
 
         size_t p = open[pi];
         open.erase(open.begin() + pi);

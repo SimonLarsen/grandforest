@@ -90,9 +90,11 @@ const uint MAX_IMP_MODE = 5;
 enum SubgraphMode {
     SUBGRAPH_BFS = 1,
     SUBGRAPH_DFS = 2,
-    SUBGRAPH_RANDOM = 3
+    SUBGRAPH_RANDOM = 3,
+    SUBGRAPH_RANDOM_ADJUSTED = 4
 };
-const uint MAX_SUBGRAPH_MODE = 3;
+
+const uint MAX_SUBGRAPH_MODE = 4;
 
 // Split mode
 enum SplitRule {

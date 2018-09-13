@@ -103,6 +103,7 @@ protected:
   void findSubgraphBFS(std::set<size_t> &result);
   void findSubgraphDFS(std::set<size_t> &result);
   void findSubgraphRandom(std::set<size_t> &result);
+  void findSubgraphRandomAdjusted(std::set<size_t> &result);
 
   bool splitNode(size_t nodeID);
   virtual bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) = 0;

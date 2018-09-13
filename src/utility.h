@@ -486,6 +486,13 @@ void maxstat(std::vector<double>& scores, std::vector<double>& x, std::vector<si
  */
 std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector<size_t>& indices);
 
+/**
+ * Perform roulette wheel selection
+ * @param p Fitness (or probability) of selecting each element
+ * @return Index of selected element
+ */
+size_t rouletteSelection(const std::vector<double> &p, std::mt19937_64 &random_number_generator);
+
 // User interrupt from R
 #ifdef R_BUILD
 static void chkIntFn(void *dummy) {

@@ -571,3 +571,15 @@ std::vector<size_t> numSamplesLeftOfCutpoint(std::vector<double>& x, std::vector
 
   return num_samples_left;
 }
+
+size_t rouletteSelection(const std::vector<double> &p, std::mt19937_64 &random_number_generator) {
+  double psum = std::accumulate(p.begin(), p.end(), 0.0);
+  std::uniform_real_distribution<double> dist(0.0, psum);
+  double value = dist(random_number_generator);
+  double acc = 0;
+  for(size_t i = 0; i < p.size(); ++i) {
+    acc += p[i];
+    if(value < acc) return i;
+  }
+  return p.size()-1;
+}

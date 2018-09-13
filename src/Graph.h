@@ -41,6 +41,7 @@ class Graph {
 
 		size_t vertexCount() const { return num_vertices; }
 		size_t edgeCount() const { return num_edges; }
+		size_t degree(size_t i) const { return adj[i].size(); }
 
 	private:
 		void from_edgelist(size_t num_vertices, const std::vector<std::pair<size_t,size_t>>& edges);

@@ -9,12 +9,13 @@ grandforest(formula = NULL, data = NULL, graph_data = NULL,
   subgraph = "bfs", write.forest = TRUE, probability = FALSE,
   min.node.size = NULL, replace = TRUE, sample.fraction = ifelse(replace,
   1, 0.632), case.weights = NULL, splitrule = NULL, num.random.splits = 1,
-  alpha = 0.5, minprop = 0.1, split.select.weights = NULL,
-  always.split.variables = NULL, respect.unordered.factors = NULL,
-  scale.permutation.importance = FALSE, keep.inbag = FALSE,
-  holdout = FALSE, num.threads = NULL, save.memory = FALSE,
-  verbose = TRUE, seed = NULL, dependent.variable.name = NULL,
-  status.variable.name = NULL, classification = NULL)
+  random.root = FALSE, alpha = 0.5, minprop = 0.1,
+  split.select.weights = NULL, always.split.variables = NULL,
+  respect.unordered.factors = NULL, scale.permutation.importance = FALSE,
+  keep.inbag = FALSE, holdout = FALSE, num.threads = NULL,
+  save.memory = FALSE, verbose = TRUE, seed = NULL,
+  dependent.variable.name = NULL, status.variable.name = NULL,
+  classification = NULL)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} or \code{character} describing the model to fit. Interaction terms supported only for numerical variables.}
@@ -29,7 +30,7 @@ grandforest(formula = NULL, data = NULL, graph_data = NULL,
 
 \item{importance}{Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index for classification, the variance of the responses for regression and the sum of test statistics (see \code{splitrule}) for survival.}
 
-\item{subgraph}{Feature subgraph selection mode. One of 'bfs', 'dfs', 'random'.}
+\item{subgraph}{Feature subgraph selection mode. One of 'bfs', 'dfs', 'random', 'random.adjusted'.}
 
 \item{write.forest}{Save \code{grandforest.forest} object, required for prediction. Set to \code{FALSE} to reduce memory usage if no prediction intended.}
 
@@ -46,6 +47,8 @@ grandforest(formula = NULL, data = NULL, graph_data = NULL,
 \item{splitrule}{Splitting rule. For classification and probability estimation "gini" or "extratrees" with default "gini". For regression "variance", "extratrees" or "maxstat" with default "variance". For survival "logrank", "extratrees", "C" or "maxstat" with default "logrank".}
 
 \item{num.random.splits}{For "extratrees" splitrule.: Number of random splits to consider for each candidate splitting variable.}
+
+\item{random.root}{Choose root in decision trees randomly from subnetworks.}
 
 \item{alpha}{For "maxstat" splitrule: Significance threshold to allow splitting.}
 

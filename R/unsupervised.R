@@ -27,7 +27,7 @@
 ##' @param importance Variable importance mode, one of 'none', 'impurity', 'impurity_corrected', 'permutation'. The 'impurity' measure is the Gini index.
 ##' @param ... Other arguments to be passed to the \code{grandforest} function during training.
 ##' @export
-grandforest_unsupervised <- function(data, graph_data=NULL, replace=TRUE, importance="impurity", ...) {
+grandforest_unsupervised <- function(data, graph_data, replace=TRUE, importance="impurity", ...) {
   bg <- apply(data, 2, function(x) sample(x, length(x), replace))
   
   D <- data.frame(

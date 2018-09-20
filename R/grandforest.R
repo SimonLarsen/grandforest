@@ -188,6 +188,11 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
                         dependent.variable.name = NULL, status.variable.name = NULL,
                         classification = NULL) {
 
+  ## Check if graph data is provided
+  if (is.null(graph_data)) {
+    stop("Error: Please provide graph data with the 'graph_data' argument.")
+  }
+
   ## GenABEL GWA data
   if ("gwaa.data" %in% class(data)) {
     snp.names <- data@gtdata@snpnames

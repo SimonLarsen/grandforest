@@ -4,7 +4,7 @@
 \alias{grandforest_unsupervised}
 \title{Train unsupervised Grand Forest model.}
 \usage{
-grandforest_unsupervised(data, graph_data = NULL, replace = TRUE,
+grandforest_unsupervised(data, graph_data, replace = TRUE,
   importance = "impurity", ...)
 }
 \arguments{

@@ -291,6 +291,7 @@ predict.grandforest.forest <- function(
   sample.fraction <- 1
   holdout <- FALSE
   num.random.splits <- 1
+  random.root <- FALSE
   
   ## Use sparse matrix
   if ("dgCMatrix" %in% class(data.final)) {
@@ -310,7 +311,8 @@ predict.grandforest.forest <- function(
                            status.variable.name, prediction.mode, forest, snp.data, replace, probability,
                            unordered.factor.variables, use.unordered.factor.variables, save.memory, splitrule,
                            case.weights, use.case.weights, predict.all, keep.inbag, sample.fraction,
-                           alpha, minprop, holdout, prediction.type, num.random.splits, sparse.data, use.sparse.data)
+                           alpha, minprop, holdout, prediction.type, num.random.splits, random.root,
+                           sparse.data, use.sparse.data)
 
   if (length(result) == 0) {
     stop("User interrupt or internal error.")

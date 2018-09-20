@@ -39,7 +39,6 @@
 #include <vector>
 #include <random>
 #include <iostream>
-#include <set>
 
 #include "globals.h"
 #include "Data.h"
@@ -93,17 +92,17 @@ public:
   const std::vector<size_t>& getInbagCounts() const {
     return inbag_counts;
   }
-
+  
 protected:
   void createPossibleSplitVarSubset(std::vector<size_t>& result);
 
   void createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> &result);
 
-  void createFeatureSubgraph(std::set<size_t> &result);
-  void findSubgraphBFS(std::set<size_t> &result);
-  void findSubgraphDFS(std::set<size_t> &result);
-  void findSubgraphRandom(std::set<size_t> &result);
-  void findSubgraphRandomAdjusted(std::set<size_t> &result);
+  void createFeatureSubgraph(std::vector<size_t> &result);
+  void findSubgraphBFS(std::vector<size_t> &result);
+  void findSubgraphDFS(std::vector<size_t> &result);
+  void findSubgraphRandom(std::vector<size_t> &result);
+  void findSubgraphRandomAdjusted(std::vector<size_t> &result);
 
   bool splitNode(size_t nodeID);
   virtual bool splitNodeInternal(size_t nodeID, std::vector<size_t>& possible_split_varIDs) = 0;
@@ -179,7 +178,7 @@ protected:
   Graph* graph;
 
   // Feature subgraph
-  std::set<size_t> subgraph;
+  std::vector<size_t> subgraph;
 
   // Feature subgraph selection mode
   SubgraphMode subgraph_mode;

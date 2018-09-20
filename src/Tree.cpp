@@ -276,10 +276,9 @@ void Tree::createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> 
     // root node
     if(nodeID == 0) {
         if(random_root) {
-          std::vector<size_t> tmp(subgraph.begin(), subgraph.end());
-          std::uniform_int_distribution<size_t> dist(0, tmp.size()-1);
+          std::uniform_int_distribution<size_t> dist(0, subgraph.size()-1);
           size_t index = dist(random_number_generator);
-          result.push_back(tmp[index]);
+          result.push_back(subgraph[index]);
         } else {
           std::copy(subgraph.begin(), subgraph.end(), std::back_inserter(result));
         }
@@ -295,7 +294,7 @@ void Tree::createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> 
     }
 }
 
-void Tree::createFeatureSubgraph(std::set<size_t> &result) {
+void Tree::createFeatureSubgraph(std::vector<size_t> &result) {
     if(subgraph_mode == SUBGRAPH_BFS) {
         findSubgraphBFS(result);
     } else if(subgraph_mode == SUBGRAPH_DFS) {
@@ -307,7 +306,7 @@ void Tree::createFeatureSubgraph(std::set<size_t> &result) {
     }
 }
 
-void Tree::findSubgraphBFS(std::set<size_t> &result) {
+void Tree::findSubgraphBFS(std::vector<size_t> &result) {
     std::queue<size_t> open;
     std::vector<bool> marked(graph->vertexCount(), false);
 
@@ -337,11 +336,11 @@ void Tree::findSubgraphBFS(std::set<size_t> &result) {
                 marked[c] = true;
             }
         }
-        result.insert(p);
+        result.push_back(p);
     }
 }
 
-void Tree::findSubgraphDFS(std::set<size_t> &result) {
+void Tree::findSubgraphDFS(std::vector<size_t> &result) {
     std::stack<size_t> open;
     std::vector<bool> marked(graph->vertexCount(), false);
 
@@ -371,11 +370,11 @@ void Tree::findSubgraphDFS(std::set<size_t> &result) {
                 marked[c] = true;
             }
         }
-        result.insert(p);
+        result.push_back(p);
     }
 }
 
-void Tree::findSubgraphRandom(std::set<size_t> &result) {
+void Tree::findSubgraphRandom(std::vector<size_t> &result) {
     std::vector<size_t> open;
     std::vector<bool> marked(graph->vertexCount(), false);
 
@@ -406,11 +405,11 @@ void Tree::findSubgraphRandom(std::set<size_t> &result) {
                 marked[c] = true;
             }
         }
-        result.insert(p);
+        result.push_back(p);
     }
 }
 
-void Tree::findSubgraphRandomAdjusted(std::set<size_t> &result) {
+void Tree::findSubgraphRandomAdjusted(std::vector<size_t> &result) {
     std::vector<size_t> open;
     std::vector<bool> marked(graph->vertexCount(), false);
 
@@ -445,7 +444,7 @@ void Tree::findSubgraphRandomAdjusted(std::set<size_t> &result) {
                 marked[c] = true;
             }
         }
-        result.insert(p);
+        result.push_back(p);
     }
 }
 

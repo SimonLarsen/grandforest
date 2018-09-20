@@ -93,6 +93,10 @@ public:
     return inbag_counts;
   }
   
+  const std::vector<size_t>& getSubgraph() const {
+    return subgraph;
+  }
+  
 protected:
   void createPossibleSplitVarSubset(std::vector<size_t>& result);
 

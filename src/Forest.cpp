@@ -327,6 +327,10 @@ void Forest::run(bool verbose) {
       }
       computePermutationImportance();
     }
+    
+    if(graph != 0) {
+      computeVariableFrequency();
+    }
   }
 }
 
@@ -701,6 +705,22 @@ void Forest::growTreesInThread(uint thread_idx, std::vector<double>* variable_im
       std::unique_lock<std::mutex> lock(mutex);
       ++progress;
       condition_variable.notify_one();
+    }
+  }
+}
+
+void Forest::computeVariableFrequency() {
+  variable_frequency.resize(num_independent_variables, 0);
+  
+  for(const Tree *tree : trees) {
+    for(size_t varID : tree->getSubgraph()) {
+      size_t tempvarID = data->getUnpermutedVarID(varID);
+      for (auto& skip : data->getNoSplitVariables()) {
+        if (tempvarID >= skip) {
+          --tempvarID;
+        }
+      }
+      variable_frequency[tempvarID] += 1.0 / num_trees;
     }
   }
 }

@@ -223,6 +223,7 @@ Rcpp::List grandforestCpp(
         result.push_back(forest->getVariableImportance(), "variable.importance");
       }
       result.push_back(forest->getOverallPredictionError(), "prediction.error");
+      result.push_back(forest->getVariableFrequency(), "variable.frequency");
     }
     
     if (keep_inbag) {

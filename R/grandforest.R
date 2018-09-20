@@ -658,6 +658,9 @@ grandforest <- function(formula = NULL, data = NULL, graph_data = NULL,
   if (importance.mode != 0) {
     names(result$variable.importance) <- all.independent.variable.names
   }
+  if(length(result$variable.frequency) > 0) {
+    names(result$variable.frequency) <- all.independent.variable.names
+  }
 
   ## Set predictions
   if (treetype == 1 && is.factor(response)) {

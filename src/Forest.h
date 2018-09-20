@@ -120,6 +120,9 @@ public:
   const std::vector<double>& getVariableImportance() const {
     return variable_importance;
   }
+  const std::vector<double>& getVariableFrequency() const {
+    return variable_frequency;
+  }
   double getOverallPredictionError() const {
     return overall_prediction_error;
   }
@@ -166,6 +169,8 @@ protected:
   virtual void computePredictionErrorInternal() = 0;
 
   void computePermutationImportance();
+  
+  void computeVariableFrequency();
 
   // Multithreading methods for growing/prediction/importance, called by each thread
   void growTreesInThread(uint thread_idx, std::vector<double>* variable_importance);
@@ -248,6 +253,9 @@ protected:
 
   // Variable importance for all variables in forest
   std::vector<double> variable_importance;
+  
+  // Frequency of each variable in feature subgraphs
+  std::vector<double> variable_frequency;
 
   // Computation progress (finished trees)
   size_t progress;

@@ -36,6 +36,7 @@
 #include <iterator>
 #include <queue>
 #include <stack>
+#include <algorithm>
 
 #include "Tree.h"
 #include "utility.h"
@@ -304,6 +305,7 @@ void Tree::createFeatureSubgraph(std::vector<size_t> &result) {
     } else {
         findSubgraphRandomAdjusted(result);
     }
+    std::sort(result.begin(), result.end());
 }
 
 void Tree::findSubgraphBFS(std::vector<size_t> &result) {

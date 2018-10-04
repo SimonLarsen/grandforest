@@ -287,7 +287,7 @@ void Tree::createPossibleSplitVarSubsetGraph(size_t nodeID, std::vector<size_t> 
         size_t parentID = parent_nodeIDs[nodeID];
         size_t parent_varID = split_varIDs[parentID];
 
-        const std::set<size_t> adj = graph->adjacent(parent_varID);
+        const std::set<size_t> &adj = graph->adjacent(parent_varID);
         result.resize(adj.size());
 
         std::vector<size_t>::iterator result_end = std::set_intersection(adj.begin(), adj.end(), subgraph.begin(), subgraph.end(), result.begin());

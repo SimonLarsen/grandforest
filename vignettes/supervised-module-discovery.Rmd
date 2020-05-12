@@ -88,8 +88,8 @@ library(org.Hs.eg.db) # for mapping Entrez IDs to gene names
 top25 <- importance(model) %>%
   sort(decreasing=TRUE) %>%
   head(25) %>%
-  as_data_frame %>%
-  rownames_to_column(var="gene") %>%
+  enframe %>%
+  rename(name = "gene")  %>%
   mutate(label=mapIds(org.Hs.eg.db, gene, "SYMBOL", "ENTREZID"))
 
 print(top25)
